@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="pt_BR">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title data-localize="title">WebPhone</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.6.0/css/bulma.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/bulma.override.css">
+
+    <script defer src="./node_modules/jquery-localize/dist/jquery.localize.min.js"></script>
+
+  </head>
+  <body>
+    <div class="app">
+        <header>
+            <div class="tabs is-centered">
+                <ul>
+                    <li class="is-active">
+                        <a id="tabDial">
+                            <span class="icon is-small">
+                                <i class="fa fa-phone"></i>
+                            </span>
+                            <span>Dial</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a id="tabHistory" disabled>
+                            <span class="icon is-small">
+                                <i class="fa fa-address-card-o"></i>
+                            </span>
+                            <span>History</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a id="tabConfig" disabled>
+                            <span class="icon is-small">
+                                <i class="fa fa-wrench"></i>
+                            </span>
+                            <span>Config</span>
+                        </a>
+                    </li>
+            
+                </ul>
+            </div>
+        </header>
+        <div id="content" >
+            
+            <div id="dialPage" class="container">
+
+                <div id="caller-digits" class="is-unselectable box has-text-centered">
+   
+                    <audio id="remoteAudio" style="display: none"></audio>
+                    
+                    <div>
+                        <canvas id="phone-waveform" style="width: 250px;height: 40px;background-color: #56585a"></canvas>
+                    </div>
+
+                    <div style="position: relative;top: -40px;margin-bottom: -40px;float: left;width: 100%;">
+                        <span id="phoneStatus" class="tag"></span>
+                    </div>
+
+                    <div class="call-row">
+                        <a class="button is-large">1</a>
+                        <a class="button is-large">2</a>
+                        <a class="button is-large">3</a>
+                    </div>
+
+                    <div class="call-row">
+                        <a class="button is-large">4</a>
+                        <a class="button is-large">5</a>
+                        <a class="button is-large">6</a>
+                    </div>
+
+                    <div class="call-row">
+                        <a class="button is-large">7</a>
+                        <a class="button is-large">8</a>
+                        <a class="button is-large">9</a>
+                    </div>
+
+                    <div>
+                        <a class="button is-large">*</a>
+                        <a class="button is-large">0</a>
+                        <a class="button is-large">#</a>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+
+        <footer>
+
+            <div class="field has-addons">
+
+                <div class="control is-expanded has-icons-left">
+                    <input id="phoneNumber" data-localize="phoneNumber_field"
+                        class="input is-medium" type="text" placeholder="Digite o número">
+                    <span class="icon is-left">
+                        <i class="fa fa-hashtag"></i>
+                    </span>
+                </div>
+            
+                <div class="control">
+                    <a id="btnCall" class="button is-medium is-success">
+                        <span class="icon is-small">
+                            <i class="fa fa-phone"></i>
+                        </span>
+                    </a>
+            
+                </div>
+            </div>
+
+        </footer>
+    </div>
+
+
+    <input type="checkbox" id="ov" onchange="$('.overlay').removeClass('active')"></input>
+
+    <div id="overlay" >
+
+                <nav id="nav-call-in">
+                    <ul>
+                        <li><h1 class="title" data-localize="status_call_in">New Call</h1></li>
+                        <li>
+                            <div><div class="calling ball-scale-multiple"><div></div><div></div><div></div></div></div>
+                        </li>
+                        <li><a class="button is-danger cancel" href="#" data-localize="cancel">Cancel</a></li>
+                        <li><a class="button is-success answer" href="#" data-localize="answer">Answer</a></li>
+                    </ul>
+                </nav>
+
+                <nav id="nav-call-out">
+                    <ul>
+                        <li><h1 class="title" data-localize="status_call_out">Calling...</h1></li>
+                        <li>
+                            <div><div class="calling ball-scale-multiple"><div></div><div></div><div></div></div></div>
+                        </li>
+                        <li><a class="button is-danger cancel" href="#" data-localize="cancel">Cancel</a></li>
+                    </ul>
+                </ul>
+    </div>
+    
+    <script src="/node_modules/jquery/dist/jquery.min.js"></script>
+    <script src="/node_modules/sip.js/dist/sip-0.8.3.js"></script>
+    <script src="/node_modules/wolfy87-eventemitter/EventEmitter.min.js"></script>
+    <!-- <script src="/node_modules/sip.js/dist/sip-0.8.3.min.js"></script> -->
+    <script src="/app/utils/dtmf.js"></script>
+    <script src="/app/utils/waveform.js"></script>
+
+    <script src="/app/CallController.js"></script>
+    <script src="/app/DialPage.js"></script>
+    <script src="/app/app.js"></script>
+  </body>
+</html>

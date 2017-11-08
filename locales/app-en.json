@@ -1,0 +1,21 @@
+{
+    "title" : "WebPhone SIP",
+    "phoneNumber_field" : "Phone Number / URI",
+
+    "error_no_account" : "Account not configured !",
+
+    "status_ended" : "Finalizada",
+    "status_connected" : "Conectado",
+    "status_registered" : "Ativo",
+    "status_call_in" : "Nova Chamada",
+    "status_call_out" : "Discando",
+    "status_unregistered" : "Off-Line / Logout",
+    "status_registrationFailed" : "Falha na Autenticação",
+    
+
+    "cal_in" : "New Call",
+    "cal_out" : "Calling ...",
+    "cancel" : "Cancel",
+    "answer" : "Answer"
+    
+}

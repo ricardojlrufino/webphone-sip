@@ -1,0 +1,19 @@
+{
+  "name": "webphone-sip",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "python -m SimpleHTTPServer 5000"
+  },
+  "keywords": [],
+  "author": "Ricardo JL Rufino",
+  "license": "",
+  "dependencies": {
+    "bulma": "^0.6.0",
+    "jquery": "^3.2.1",
+    "jquery-localize": "^0.1.0",
+    "sip.js": "^0.8.3",
+    "wolfy87-eventemitter": "^5.2.3"
+  }
+}

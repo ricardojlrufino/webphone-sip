@@ -1,0 +1,8 @@
+{
+    "appDesc": {
+        "message": "Integrated Asterisk / Freeswitch extension that automatically identifies phone numbers, and allows you to make calls through the browser."
+    },
+    "call_action": {
+        "message": "Call to %s"
+    }
+}

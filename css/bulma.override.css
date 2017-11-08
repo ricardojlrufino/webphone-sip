@@ -1,0 +1,24 @@
+
+header .tabs a{
+    color: white;
+}
+
+header .tabs li.is-active{
+    background-color: #23d160;
+    color:white;
+}
+
+header .tabs li.is-active a{
+    color:white;
+    border-bottom-color: #46f74b;
+}
+
+
+header .tabs a:hover{
+    color:rgb(129, 129, 129);
+    border-bottom-color: #468bf7;
+}
+
+a[disabled] {
+    cursor: not-allowed;
+}

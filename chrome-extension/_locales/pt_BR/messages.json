@@ -1,0 +1,8 @@
+{
+    "appDesc": {
+        "message": "Extensão integrada Asterisk / Freeswitch que identifica automaticamente números de telefone, e permite realizar as ligações pelo navegador."
+    },
+    "call_action": {
+        "message": "Ligar para %s"
+    }
+}

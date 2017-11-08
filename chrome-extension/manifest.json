@@ -1,0 +1,33 @@
+{
+    "manifest_version": 2,
+    "name": "WebPhone",
+    "description" : "__MSG_appDesc__",
+    "version": "0.1",
+    "default_locale" : "en",
+    "icons": {
+        "128": "/img/icon_128.png"
+    },
+    "browser_action": {
+        "default_icon": "/img/icon_16.png"
+    },
+    "background": {
+        "scripts": ["background.js"]
+      },
+    "content_scripts": [
+        {
+            "matches": [
+                "<all_urls>"
+            ],
+            "js": [
+                "content.js"
+            ]
+        }
+    ],
+    "permissions": [
+        "tabs",
+        "contextMenus",
+        "notifications",
+        "http://*/",
+        "https://*/"
+    ]
+}
