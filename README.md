@@ -25,7 +25,8 @@ This allows integration with any CRM. In the menu you also have an option to mak
 https://chrome.google.com/webstore/detail/webphone/mcajodgaocmkmmomogbefkghjepgilnc
 
 ## Ready to use
-I did a free version (hosted in github) that is used by the chrome extension.  
+I did a free version (hosted in github) that is used by the chrome extension (as popUP).  
+If you improve this code, automatically it's reflected in the extension.  
 Please send me feedback if you will use. ;)  
 
 ### Requirements
