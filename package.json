@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "python -m SimpleHTTPServer 5000"
+    "start": "python -m SimpleHTTPServer 5000",
+    "build": "gulp build:production"
   },
   "keywords": [],
   "author": "Ricardo JL Rufino",
