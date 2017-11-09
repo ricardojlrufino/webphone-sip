@@ -18,7 +18,7 @@
     "status_connected" : "Connected",
     "status_registered" : "Registered",
     "status_call_in" : "Ringing",
-    "status_call_out" : "Calling",
+    "status_call_out" : "Calling...",
     "status_unregistered" : "Off-Line / Logout",
     "status_registrationFailed" : "Auth Fail",
     
@@ -28,6 +28,8 @@
     "cancel" : "Cancel",
     "save" : "Save",
     "clean" : "Clean",
-    "answer" : "Answer"
+    "answer" : "Answer",
+    "mute" : "Mute",
+    "hold" : "Hold"
     
 }

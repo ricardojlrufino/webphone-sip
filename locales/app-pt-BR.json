@@ -28,6 +28,8 @@
     "cancel" : "Cancelar",
     "save" : "Salvar",
     "clean" : "Limpar",
-    "answer" : "Atender"
+    "answer" : "Atender",
+    "mute" : "Mudo",
+    "hold" : "Pausar"
     
 }

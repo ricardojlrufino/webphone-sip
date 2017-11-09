@@ -7,7 +7,11 @@
     <title data-localize="title">WebPhone</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
     
-    <link rel="stylesheet" href="dist/css/app.min.css">
+    <!-- build:css dist/css/app.min.css -->    
+    <link rel="stylesheet" href="/node_modules/bulma/css/bulma.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/bulma.override.css">
+    <!-- endbuild -->
 
   </head>
   <body>
@@ -177,8 +181,20 @@
         </ul>
     </div>
     
-    <script src="dist/js/contrib.bundle.js"></script>
+    <!-- build:js dist/js/contrib.bundle.js -->
+    <script src="/node_modules/jquery/dist/jquery.min.js"></script>
+    <script src="/node_modules/sip.js/dist/sip-0.8.3.js"></script>
+    <script src="/node_modules/wolfy87-eventemitter/EventEmitter.min.js"></script>
+    <script src="/node_modules/jquery-localize/dist/jquery.localize.min.js"></script>
+    <!-- endbuild -->
 
-    <script src="dist/js/main.min.js"></script>
+    <!-- build:js dist/js/main.min.js -->
+    <script src="/app/utils/dtmf.js"></script>
+    <script src="/app/utils/waveform.js"></script>
+    <script src="/app/CallController.js"></script>
+    <script src="/app/DialPage.js"></script>
+    <script src="/app/ConfigPage.js"></script>
+    <script src="/app/app.js"></script>
+    <!-- endbuild -->
   </body>
 </html>
