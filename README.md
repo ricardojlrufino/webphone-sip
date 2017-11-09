@@ -3,6 +3,8 @@ WebRTC SIP based VoIP client software (+chrome extension)
 
 It allows you to make calls using your browser in an extremely productive way.
 
+![Preview](/docs/preview-1400x560.png?raw=true "Preview")
+
 ## Features
 * Make and get calls
 * Audio effects using JS Audio API (Ex.: DTMF)
@@ -25,7 +27,8 @@ This allows integration with any CRM. In the menu you also have an option to mak
 https://chrome.google.com/webstore/detail/webphone/mcajodgaocmkmmomogbefkghjepgilnc
 
 ## Ready to use
-I did a free version (hosted in github) that is used by the chrome extension.  
+I did a free version (hosted in github) that is used by the chrome extension (as popUP).  
+If you improve this code, automatically it's reflected in the extension.  
 Please send me feedback if you will use. ;)  
 
 ### Requirements
