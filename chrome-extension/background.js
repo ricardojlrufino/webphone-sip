@@ -41,7 +41,7 @@ function createPopup(callback){
     if(popup == null){
         var cfg = {
             url: WEBPHONE_URL,
-            width: 300,
+            width: 348,
             height: 480,
             focused: true,
             type: "panel",
