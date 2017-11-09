@@ -1,8 +1,8 @@
 
 var popup = null;
-var WEBPHONE_DEV = "http://localhost:5000";
-var WEBPHONE_PROD = "";
-var WEBPHONE_URL = WEBPHONE_DEV;
+var WEBPHONE_DEV = "http://localhost:5000/index.src.html";
+var WEBPHONE_PROD = "https://ricardojlrufino.github.io/webphone-sip";
+var WEBPHONE_URL = WEBPHONE_PROD;
 var ENABLE_LOG = true;
 
 
