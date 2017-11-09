@@ -83,6 +83,17 @@ html{
 	background-color: #a57a24 !important;
 }
 
+#controls-call-active{
+  display: none;
+}
+
+footer.call-active #controls-call-inactive{
+  display: none;
+}
+
+footer.call-active #controls-call-active{
+  display: block;
+}
 
 
 /* ---------------- Overlay  ---------------- */
@@ -109,7 +120,7 @@ html{
   cursor:pointer;
 }
 
-#overlay h1{
+#overlay .title, #overlay .subtitle{
   color: white;
 }
 

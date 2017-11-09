@@ -4,28 +4,97 @@ var DialPage = (function () {
     var $btnCall, $phoneNumber;
     var callActive = false;
 
-    function onCallStateChange(state){
+    var public  = {};
+
+    public.init = function (el) {
+        
+        $el = el;
+
+        App.on('call::state_change', onCallStateChange);
+
+        DTMFAudio.init(); // init audio buffers
+
+        $btnCall = $("#btnCall");
+        $phoneNumber = $("#phoneNumber");
+        $phoneNumber.keyup(function (e) {
+            if (e.keyCode == 13) $btnCall.trigger("click");
+            if (e.keyCode == 38 || e.keyCode == 40) { // up-down
+                $phoneNumber.val(localStorage.getItem('dial.lastNumber'));
+            }
+        });
+
+
+        $("#btnMute").on('click', function(){
+            var activate = ! ($(this).data('active') || false);
+            CallController.setMute(activate);
+            $(this).data('active', activate)
+            if(activate){
+                $(this).removeClass("is-outlined");
+            }else{
+                $(this).addClass("is-outlined");
+            }
+        });
+
+        $("#btnHold").on('click', function(){
+            var activate = ! ($(this).data('active') || false);
+            CallController.setHold(activate);
+            $(this).data('active', activate)
+            if(activate){
+                $(this).removeClass("is-outlined");
+            }else{
+                $(this).addClass("is-outlined");
+            }
+        });
+
+        $("#btnStopCall").on('click', function(){
+            CallController.stop();
+        });
+    
+        $btnCall.on('click', function(){
+
+            if(callActive){
+                CallController.stop();
+            }else{
+                var number = $phoneNumber.val();
+                localStorage.setItem('dial.lastNumber', number);
+                CallController.call(number);
+            }
+
+        });
+
+        // Play tones
+        $("#caller-digits a").click(function(){
+            var text = $(this).text();
+
+            DTMFAudio.play(text);
+
+            if(callActive) CallController.sendDTMF(text);
+            else{
+                $phoneNumber.val($phoneNumber.val() + text);
+            }
+
+        });
+
+    };
+
+    public.show = function () {
+        // none
+    };
+
+    function onCallStateChange(state, e){
         
         var $status = $("#phoneStatus");
         $status.html($loc['status_'+state.replace("-", "_")]);
         $status.attr('class', 'tag phoneStatus-'+state);
 
-        $btnCall = $("#btnCall");
-
-        App.emit('call::state_change', state);
-
         // General status
         if(state == "connected"){
             callActive = true;
+            $("footer").addClass('call-active');
+            $("#controls-call-active .button").data("active", false); // reset state
         }else{
             callActive = false;
-        }
-
-        // btnCall state
-        if(state == "call-out" || state == "connecting" || state == "connecting"){
-            $btnCall.addClass("is-loading");
-        }else{
-            $btnCall.removeClass("is-loading");
+            $("footer").removeClass('call-active');
         }
 
         // Sound Interactions
@@ -58,59 +127,6 @@ var DialPage = (function () {
         
     }
     
-    return {
-
-        init: function (el) {
-
-            $el = el;
-            CallController.init(el, onCallStateChange);
-            DTMFAudio.init(); // init audio buffers
-
-            $btnCall = $("#btnCall");
-            $phoneNumber = $("#phoneNumber");
-            $phoneNumber.keyup(function(e){
-                if(e.keyCode == 13) $btnCall.trigger("click");
-                if(e.keyCode == 38 || e.keyCode == 40){ // up-down
-                    $phoneNumber.val(localStorage.getItem('dial.lastNumber'));
-                }
-             });
-      
-            $btnCall.on('click', function(){
-
-                if(callActive){
-                    CallController.stop();
-                }else{
-                    var number = $phoneNumber.val();
-                    localStorage.setItem('dial.lastNumber', number);
-                    CallController.call(number);
-                }
-
-            });
-
-            // 
-            $("#caller-digits a").click(function(){
-                var text = $(this).text();
-
-                // if(text == '1') DTMFAudio.playCustom('dial');
-                // if(text == '2') DTMFAudio.playCustom('ringback');
-                // if(text == '3') DTMFAudio.playCustom('busy');
-                // if(text == '4') DTMFAudio.playCustom('reorder');
-                // if(text == '5') DTMFAudio.playCustom('howler');
-                // if(text == '*') DTMFAudio.stop();
-
-                $("#op").attr('checked', true);
-
-                DTMFAudio.play(text);
-
-                if(callActive) CallController.sendDTMF(text);
-                else{
-                    $phoneNumber.val($phoneNumber.val() + text);
-                }
-
-            });
-
-        }
-
-    };
+    return public;
 
 })();

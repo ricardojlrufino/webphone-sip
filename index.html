@@ -19,27 +19,27 @@
             <div class="tabs is-centered">
                 <ul>
                     <li class="is-active">
-                        <a id="tabDial">
+                        <a data-tab="DialPage" disabled>
                             <span class="icon is-small">
                                 <i class="fa fa-phone"></i>
                             </span>
-                            <span>Dial</span>
+                            <span data-localize="tab_dial">Dial</span>
                         </a>
                     </li>
                     <li>
-                        <a id="tabHistory" disabled>
+                        <a data-tab="HistoryPage" disabled>
                             <span class="icon is-small">
                                 <i class="fa fa-address-card-o"></i>
                             </span>
-                            <span>History</span>
+                            <span data-localize="tab_history">History</span>
                         </a>
                     </li>
                     <li>
-                        <a id="tabConfig" disabled>
+                        <a data-tab="ConfigPage">
                             <span class="icon is-small">
                                 <i class="fa fa-wrench"></i>
                             </span>
-                            <span>Config</span>
+                            <span data-localize="tab_config">Config</span>
                         </a>
                     </li>
             
@@ -47,8 +47,17 @@
             </div>
         </header>
         <div id="content" >
+
+
+            <div id="ConfigPage" class="container tab-content">
+                <!-- AJAX -->
+            </div>
+                
+            <div id="HistoryPage" class="container tab-content">
+                <!-- AJAX -->
+            </div>
             
-            <div id="dialPage" class="container">
+            <div id="DialPage" class="container tab-content" data-loaded="true">
 
                 <div id="caller-digits" class="is-unselectable box has-text-centered">
    
@@ -92,54 +101,83 @@
 
         <footer>
 
-            <div class="field has-addons">
+            <div id="controls-call-inactive">
 
-                <div class="control is-expanded has-icons-left">
-                    <input id="phoneNumber" data-localize="phoneNumber_field"
-                        class="input is-medium" type="text" placeholder="Digite o número">
-                    <span class="icon is-left">
-                        <i class="fa fa-hashtag"></i>
-                    </span>
+                <div class="field has-addons">
+
+                    <div class="control is-expanded has-icons-left">
+                        <input id="phoneNumber" data-localize="phoneNumber_field"
+                            class="input is-medium" type="text" placeholder="Digite o número">
+                        <span class="icon is-left">
+                            <i class="fa fa-hashtag"></i>
+                        </span>
+                    </div>
+                
+                    <div class="control">
+                        <a id="btnCall" type="button" class="button is-medium is-success" disabled>
+                            <span class="icon is-small">
+                                <i class="fa fa-chain-broken"></i>
+                            </span>
+                        </a>
+                
+                    </div>
                 </div>
-            
-                <div class="control">
-                    <a id="btnCall" class="button is-medium is-success">
+            </div>
+
+            <div id="controls-call-active">
+                <p class="field">
+
+                    <a id="btnMute" class="button is-primary is-outlined">
+                        <span class="icon">
+                            <i class="fa fa-microphone-slash"></i>
+                        </span>
+                        <span>Mudo</span>
+                    </a>
+
+                    <a id="btnHold" class="button is-primary is-outlined">
                         <span class="icon is-small">
-                            <i class="fa fa-phone"></i>
+                            <i class="fa fa-stop"></i>
+                        </span>
+                        <span>Espera</span>
+                    </a>
+
+                    <a id="btnStopCall" class="button is-danger is-right">
+                        <span>Desligar</span>
+                        <span class="icon is-small">
+                            <i class="fa fa-close"></i>
                         </span>
                     </a>
+                </p>
             
-                </div>
             </div>
 
         </footer>
     </div>
 
-
-    <input type="checkbox" id="ov" onchange="$('.overlay').removeClass('active')"></input>
-
     <div id="overlay" >
+        <nav id="nav-call-in">
+            <ul>
+                <li>
+                    <h1 class="title" data-localize="status_call_in">New Call</h1>
+                    <h2 class="subtitle"></h2>
+                </li>
+                <li>
+                    <div><div class="calling ball-scale-multiple"><div></div><div></div><div></div></div></div>
+                </li>
+                <li><a class="button is-danger cancel" href="#" data-localize="cancel">Cancel</a></li>
+                <li><a class="button is-success answer" href="#" data-localize="answer">Answer</a></li>
+            </ul>
+        </nav>
 
-                <nav id="nav-call-in">
-                    <ul>
-                        <li><h1 class="title" data-localize="status_call_in">New Call</h1></li>
-                        <li>
-                            <div><div class="calling ball-scale-multiple"><div></div><div></div><div></div></div></div>
-                        </li>
-                        <li><a class="button is-danger cancel" href="#" data-localize="cancel">Cancel</a></li>
-                        <li><a class="button is-success answer" href="#" data-localize="answer">Answer</a></li>
-                    </ul>
-                </nav>
-
-                <nav id="nav-call-out">
-                    <ul>
-                        <li><h1 class="title" data-localize="status_call_out">Calling...</h1></li>
-                        <li>
-                            <div><div class="calling ball-scale-multiple"><div></div><div></div><div></div></div></div>
-                        </li>
-                        <li><a class="button is-danger cancel" href="#" data-localize="cancel">Cancel</a></li>
-                    </ul>
-                </ul>
+        <nav id="nav-call-out">
+            <ul>
+                <li><h1 class="title" data-localize="status_call_out">Calling...</h1></li>
+                <li>
+                    <div><div class="calling ball-scale-multiple"><div></div><div></div><div></div></div></div>
+                </li>
+                <li><a class="button is-danger cancel" href="#" data-localize="cancel">Cancel</a></li>
+            </ul>
+        </ul>
     </div>
     
     <script src="/node_modules/jquery/dist/jquery.min.js"></script>
@@ -151,6 +189,7 @@
 
     <script src="/app/CallController.js"></script>
     <script src="/app/DialPage.js"></script>
+    <script src="/app/ConfigPage.js"></script>
     <script src="/app/app.js"></script>
   </body>
 </html>

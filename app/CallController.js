@@ -4,6 +4,14 @@
  */
 var CallController = (function () {
 
+    var C = {
+        STATUS_NULL:         0,
+        STATUS_NEW:          1,
+        STATUS_CONNECTING:   2,
+        STATUS_CONNECTED:    3,
+        STATUS_COMPLETED:    4
+    };
+
     var sipPhone; // SIP.js
     var callListener; // Send notifications to DialPage (call-in, call-out, etc...)
 
@@ -11,25 +19,23 @@ var CallController = (function () {
 
     var public  = {};
 
-    public.init = function (el, listener) {
+    public.init = function (config, listener) {
+        accountConfig = config;
         callListener = listener;
         initPhone();
     };
 
+    public.setListener = function (listener) {
+        callListener = listener;
+    };
+
     function initPhone(){
 
-        if(sipPhone) alert("WARN: OLD call not finished !!");
-        
-        // Load account config
-        if (!accountConfig) {
-            var data = localStorage.getItem("sip.account");
-            if (!data) {
-                alert($loc.error_no_account);
-                return false;
-            }
-            accountConfig = JSON.parse(data);
+        if(sipPhone){
+            alert("WARN: OLD call not finished !!");
+            return false;
         }
-
+        
         // create audio tag if not exist
         var remoteAudio = document.getElementById("remoteAudio");
         if(!remoteAudio){
@@ -39,41 +45,60 @@ var CallController = (function () {
         }
 
         var config = {
-            uri: accountConfig.user + '@' + accountConfig.domain,
+            uri: accountConfig.username + '@' + accountConfig.domain,
             wsServers: ['wss://' + accountConfig.proxy], // +':7443'
             authorizationUser: accountConfig.user,
             password: accountConfig.password
         };
 
-        sipPhone = new SIP.WebRTC.Simple({
-            media: {
-                remote: {
-                    audio: remoteAudio
-                }
-            },
-            ua: config
-        });
-
+        try {
+            sipPhone = new SIP.WebRTC.Simple({
+                media: {
+                    remote: {
+                        audio: remoteAudio
+                    }
+                },
+                ua: config
+            });
+        } catch (error) {
+            console.error(error);
+            alert("ERROR:" +error.message);
+            throw error;
+        }
+    
 
         window.onunload = onunloadPage;
 
         sipPhone.on('connected', function(e){ 
             callListener('connected', e);  
-       
             // e.sessionDescriptionHandler.peerConnection
-
             // if (pc.getRemoteStreams) {
             //     remoteStream = pc.getRemoteStreams()[0];
             //   }
-          
+        });
+        sipPhone.on('registered', function(e){ 
+            callListener('registered', e);  
+            localStorage.setItem("sip.registered", true);
+        });
+        sipPhone.on('unregistered', function(e){ 
+            callListener('unregistered', e);  
+            localStorage.setItem("sip.registered", false);
+        });
+        sipPhone.on('registrationFailed', function(e){ 
+            callListener('registrationFailed', e); 
+            localStorage.setItem("sip.registered", false);
+        });
+        sipPhone.on('ringing', function(e){ 
+            callListener('call-in', e);  
         } );
-        sipPhone.on('registered', function(e){ callListener('registered', e);  } );
-        sipPhone.on('unregistered', function(e){ callListener('unregistered', e);  } );
-        sipPhone.on('registrationFailed', function(e){ callListener('registrationFailed', e);  } );
-        sipPhone.on('ringing', function(e){ callListener('call-in', e);  } );
-        sipPhone.on('disconnected', function(e){ callListener('disconnected', e);  });
+        sipPhone.on('disconnected', function(e){ 
+            callListener('disconnected', e);  
+        });
         sipPhone.on('ended', function(e){callListener('ended', e);   });
 
+        // WebSocket events
+        sipPhone.ua.on('disconnected', function(e){ callListener('disconnected', e);  });
+        sipPhone.ua.on('connecting', function(e){ callListener('connecting', e);  });
 
         callListener('connecting', sipPhone);  
     }
@@ -92,11 +117,6 @@ var CallController = (function () {
         // if(sipPhone) sipPhone.stop();
     } 
 
-    function clearState(){
-        delete sipPhone;
-        sipPhone = null;
-    } 
-
     public.stop = function(){
         if(sipPhone){
             if(sipPhone.state == 1){ // new
@@ -105,6 +125,15 @@ var CallController = (function () {
                 sipPhone.hangup();
             }
        }
+    } 
+
+    public.disconnect = function(){
+        if(sipPhone && sipPhone.state != C.STATUS_NULL){
+            console.log("removing old connection");
+        }
+        delete sipPhone;
+        sipPhone = null;
+        if(callListener) callListener('disconnected');  
     } 
 
     public.getState = function(){
@@ -119,6 +148,16 @@ var CallController = (function () {
 
     public.answer = function(){
         if(sipPhone) return sipPhone.answer();
+    }
+
+    public.setMute = function(value){
+        if(value) sipPhone.mute();
+        else sipPhone.unmute();
+    }
+
+    public.setHold = function(value){
+        if(value) sipPhone.hold();
+        else sipPhone.unhold();
     }
 
          // // 

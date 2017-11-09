@@ -1,6 +1,17 @@
 {
     "title" : "WebPhone SIP",
-    "phoneNumber_field" : "Phone Number / URI",
+
+    "tab_dial" : "Discar",
+    "tab_history" : "Histórico",
+    "tab_config" : "Config.",
+
+    "phoneNumber_field" : "Discar Número",
+    "username" : "Usuário",
+    "password" : "Senha",
+    "domain" : "Domínio",
+    "proxy" : "Proxy SIP",
+    "load_from_file" : "Arquivo",
+    
 
     "error_no_account" : "Account not configured !",
 
@@ -13,9 +24,11 @@
     "status_registrationFailed" : "Falha na Autenticação",
     
 
-    "cal_in" : "New Call",
-    "cal_out" : "Calling ...",
-    "cancel" : "Cancel",
-    "answer" : "Answer"
+    "cal_in" : "Recebendo Chamada",
+    "cal_out" : "Discando...",
+    "cancel" : "Cancelar",
+    "save" : "Salvar",
+    "clean" : "Limpar",
+    "answer" : "Atender"
     
 }

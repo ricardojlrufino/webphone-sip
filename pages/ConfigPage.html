@@ -1,0 +1,61 @@
+<form class="box">
+
+    <div class="field">
+        <label class="label" data-localize="username">Username</label>
+        <div class="control has-icons-left ">
+            <input class="input is-small" type="text" name="username" required>
+            <span class="icon is-small is-left">
+                <i class="fa fa-user"></i>
+            </span>
+        </div>
+    </div>
+
+    <div class="field">
+        <label class="label" data-localize="password">Password</label>
+        <div class="control has-icons-left ">
+            <input class="input is-small" name="password" type="password">
+            <span class="icon is-small is-left">
+                <i class="fa fa-key"></i>
+            </span>
+        </div>
+    </div>
+
+    <div class="field">
+        <label class="label" data-localize="domain">Domain</label>
+        <div class="control">
+            <input class="input is-small" type="text" name="domain" placeholder="" required>
+        </div>
+    </div>
+
+    <div class="field">
+        <label class="label" data-localize="proxy">SIP Proxy</label>
+        <div class="control">
+            <input class="input is-small" type="text" name="proxy" placeholder="" required>
+        </div>
+    </div>
+
+    <div class="field is-grouped">
+        <div class="control">
+            <button type="submit" class="button is-link" data-localize="save">Save</button>
+        </div>
+        <div class="control">
+                <button type="button" class="button is-danger btnCancel" data-localize="clean">Clean</button>
+            </div>
+        <div class="control">
+            <div class="file">
+                <label class="file-label">
+                  <input class="file-input" type="file" name="resume">
+                  <span class="file-cta">
+                    <span class="file-icon">
+                      <i class="fa fa-upload"></i>
+                    </span>
+                    <span class="file-label"  data-localize="load_from_file">
+                      Choose a file…
+                    </span>
+                  </span>
+                </label>
+              </div>
+        </div>
+    </div>
+
+</form>
