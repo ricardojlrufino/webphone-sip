@@ -31,6 +31,8 @@ var ConfigPage = (function () {
                 password: $($el).find('[name="password"]').val()
             };
 
+            config.version = App.version;
+
             localStorage.setItem('sip.account', JSON.stringify(config));
 
 

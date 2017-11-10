@@ -48,7 +48,8 @@ var CallController = (function () {
             uri: accountConfig.username + '@' + accountConfig.domain,
             wsServers: ['wss://' + accountConfig.proxy], // +':7443'
             authorizationUser: accountConfig.user,
-            password: accountConfig.password
+            password: accountConfig.password,
+            userAgentString : 'WebPhone/'+accountConfig.version
         };
 
         try {
