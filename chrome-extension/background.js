@@ -3,7 +3,7 @@ var popup = null;
 var WEBPHONE_DEV = "http://localhost:5000/index.src.html";
 var WEBPHONE_PROD = "https://ricardojlrufino.github.io/webphone-sip";
 var WEBPHONE_URL = WEBPHONE_PROD;
-var ENABLE_LOG = true;
+var ENABLE_LOG = (WEBPHONE_URL == WEBPHONE_DEV);
 
 
 chrome.browserAction.onClicked.addListener(function (tab) {

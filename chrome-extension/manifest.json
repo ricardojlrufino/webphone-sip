@@ -2,7 +2,7 @@
     "manifest_version": 2,
     "name": "WebPhone",
     "description" : "__MSG_appDesc__",
-    "version": "0.2",
+    "version": "0.1.2",
     "default_locale" : "en",
     "icons": {
         "128": "/img/icon_128.png"
