@@ -17,6 +17,7 @@ It allows you to make calls using your browser in an extremely productive way.
 ### TODO 
 * Call History
 * WebPack build
+* Receive Calls "in Backgruound"
 
 
 ## Chrome Extension
