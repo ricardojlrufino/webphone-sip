@@ -34,6 +34,11 @@ Please send me feedback if you will use. ;)
 
 ### Requirements
 * Chrome / Firefox
-* [FreeSwitch](https://freeswitch.org/confluence/display/FREESWITCH/Linux) (+WebRTC)  (I have not done any testing using asterisk so far)
+* [FreeSwitch](https://freeswitch.org/confluence/display/FREESWITCH/Linux) (+WebRTC)  ([guide](https://sipjs.com/guides/server-configuration/freeswitch/))
 * Need Https (see)
+
+
+PS: I have not done any testing using asterisk so far
+
+
 
