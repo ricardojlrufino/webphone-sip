@@ -7,7 +7,7 @@
 
 import $ from 'jquery';
 import DTMFAudio from '../utils/dtmf';
-import CallController from '../CallController';
+import CallController, { CallStatus } from '../CallController';
 import Events from '../utils/eventEmitter';
 
 class DialPage {
@@ -180,15 +180,16 @@ class DialPage {
      * @private
      */
     #handleCallState = (state) => {
-        const isConnected = state === 'connected';
-        this.#isCallActive = isConnected;
 
-        this.#elements.footer.toggleClass('call-active', isConnected);
+        this.#isCallActive = state === CallStatus.ESTABLISHED;
 
-        if (isConnected) {
+        this.#elements.footer.toggleClass('call-active', this.#isCallActive);
+
+        if (this.#isCallActive) {
             // Reset control buttons state
             this.#elements.controlsCallActive
                 .find('.button')
+                .not("#btnStopCall")
                 .data('active', false)
                 .addClass('is-outlined');
         }
@@ -200,15 +201,15 @@ class DialPage {
      */
     #handleAudio = (state) => {
         switch (state) {
-            case 'call-out':
+            case CallStatus.CALL_OUT:
                 DTMFAudio.playCustom('dial');
                 break;
 
-            case 'call-in':
+            case CallStatus.CALL_IN:
                 DTMFAudio.playCustom('ringback');
                 break;
 
-            case 'ended':
+            case CallStatus.ENDED:
                 DTMFAudio.playCustom('howler');
                 setTimeout(() => DTMFAudio.stop(), 1000);
                 break;

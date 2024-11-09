@@ -52,7 +52,7 @@ var AudioVisualizer = (function () {
         var HEIGHT = canvas.height;
 
         if(remoteAudio){
-            console.log("Using provided mediaStream ");
+            console.log("Using provided mediaStream ", remoteAudio);
             
             setTimeout(function(){
 

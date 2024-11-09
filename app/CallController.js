@@ -5,28 +5,31 @@
 * https://opensource.org/licenses/MIT
 */
 
-import $ from 'jquery';
-import SIP from 'sip.js';
+import { SimpleUser } from "sip.js/lib/platform/web";
 
-const CallStatus = Object.freeze({
-    NULL: 0,
-    NEW: 1,
-    CONNECTING: 2,
-    CONNECTED: 3,
-    COMPLETED: 4
-});
+export const CallStatus = {
+    CALL_OUT: 'call-out',
+    CALL_IN: 'call-in',
+    ESTABLISHED: 'call-established',
+    ENDED: 'ended'
+};
 
+/**
+ * Manage Voip/SIP session and calling control using SimpleUser API
+ */
 class CallController {
-    #sipPhone;
+    #simpleUser;
     #callListener;
     #accountConfig;
+    #remoteAudio;
 
     constructor() {
-        this.#sipPhone = null;
+        this.#simpleUser = null;
         this.#callListener = null;
         this.#accountConfig = null;
+        this.#remoteAudio = null;
 
-        // Bind methods to preserve 'this' context
+        // Bind methods
         this.onUnloadPage = this.onUnloadPage.bind(this);
     }
 
@@ -50,39 +53,56 @@ class CallController {
     }
 
     /**
-     * Initialize SIP phone instance and set up event listeners
+     * Initialize SimpleUser instance and set up event listeners
      * @private
      */
     #initPhone() {
-
-        if (this.#sipPhone) {
+        if (this.#simpleUser) {
             console.warn('Warning: Previous call not finished!');
             return false;
         }
 
-        const config = {
-            uri: `${this.#accountConfig.username}@${this.#accountConfig.domain}`,
-            wsServers: [`wss://${this.#accountConfig.proxy}`],  // :7443
-            authorizationUser: this.#accountConfig.user,
-            password: this.#accountConfig.password,
-            userAgentString: `WebPhone/${this.#accountConfig.version}`
-        };
-
         try {
-            const remoteAudio = this.#getRemoteAudioElement();
-            this.#sipPhone = new SIP.WebRTC.Simple({
+            this.#remoteAudio = this.#getRemoteAudioElement();
+
+            const options = {
                 media: {
+                    constraints: {
+                        audio: true,
+                        video: false
+                    },
+                    // local: {
+                    //     video: document.getElementById("localVideo") as HTMLVideoElement
+                    // },
                     remote: {
-                        audio: remoteAudio
+                        audio: remoteAudio,
                     }
                 },
-                ua: config
-            });
+                aor: `sip:${this.#accountConfig.username}@${this.#accountConfig.domain}`,
+                userAgentOptions: {
+                    authorizationUsername: this.#accountConfig.user,
+                    authorizationPassword: this.#accountConfig.password,
+                    userAgentString: `WebPhone/${this.#accountConfig.version}`
+                }
+            };
 
+            this.#simpleUser = new SimpleUser(`wss://${this.#accountConfig.proxy}`, options);
+
+            // Setup event listeners
             this.#setupEventListeners();
             window.addEventListener('unload', this.onUnloadPage);
 
-            this.#notifyListener('connecting', this.#sipPhone);
+            // Connect and register
+            this.#simpleUser.connect()
+                .then(() => this.#simpleUser.register())
+                .then(() => {
+                    this.#notifyListener('connecting', this.#simpleUser);
+                })
+                .catch(error => {
+                    console.error('Failed to connect:', error);
+                    this.#notifyListener('registrationFailed', error);
+                });
+
         } catch (error) {
             console.error('Failed to initialize SIP phone:', error);
             throw error;
@@ -104,30 +124,39 @@ class CallController {
     }
 
     /**
-     * Set up all SIP phone event listeners
+     * Set up all SimpleUser event listeners
      * @private
      */
     #setupEventListeners() {
-        const events = [
-            'connected', 'registered', 'unregistered', 'registrationFailed',
-            'ringing', 'disconnected', 'ended'
-        ];
+        if (!this.#simpleUser) return;
 
-        events.forEach(event => {
-            this.#sipPhone.on(event, (e) => {
-                const eventName = event === 'ringing' ? 'call-in' : event;
-                this.#notifyListener(eventName, e);
-
-                if (event === 'registered' || event === 'unregistered' || event === 'registrationFailed') {
-                    localStorage.setItem('sip.registered', event === 'registered');
-                }
-            });
-        });
-
-        // WebSocket specific events
-        ['disconnected', 'connecting'].forEach(event => {
-            this.#sipPhone.ua.on(event, (e) => this.#notifyListener(event, e));
-        });
+        this.#simpleUser.delegate = {
+            onCallReceived: () => {
+                this.#notifyListener(CallStatus.CALL_IN, {
+                    from: { displayName: this.#simpleUser.session?.remoteIdentity.displayName }
+                });
+            },
+            onCallAnswered: () => {
+                this.#notifyListener(CallStatus.ESTABLISHED);
+            },
+            onCallHangup: () => {
+                this.#notifyListener(CallStatus.ENDED);
+            },
+            onRegistered: () => {
+                localStorage.setItem('sip.registered', 'true');
+                this.#notifyListener('registered', {});
+            },
+            onUnregistered: () => {
+                localStorage.setItem('sip.registered', 'false');
+                this.#notifyListener('unregistered', {});
+            },
+            onServerConnect: () => {
+                this.#notifyListener('connected', {});
+            },
+            onServerDisconnect: () => {
+                this.#notifyListener('disconnected', {});
+            }
+        };
     }
 
     /**
@@ -144,10 +173,14 @@ class CallController {
      * Make a call to the specified number
      * @param {string} number - Phone number to call
      */
-    call(number) {
-        const sanitizedNumber = number.replace(/[^a-zA-Z0-9*#/.@]/g, '');
-        this.#sipPhone?.call(sanitizedNumber);
-        this.#notifyListener('call-out', number);
+    async call(number) {
+        try {
+            await this.#simpleUser.call(number);
+            this.#notifyListener(CallStatus.CALL_OUT, number);
+        } catch (error) {
+            console.error('Call failed:', error);
+            alert("Call error: " + error);
+        }
     }
 
     /**
@@ -155,64 +188,79 @@ class CallController {
      * @private
      */
     onUnloadPage() {
-        // Implement cleanup if needed
-        // this.#sipPhone?.stop();
+        this.disconnect();
     }
 
     /**
      * Stop current call
      */
-    stop() {
-        if (!this.#sipPhone) return;
-
-        if (this.#sipPhone.state === CallStatus.NEW) {
-            this.#sipPhone.reject();
-        } else {
-            this.#sipPhone.hangup();
+    async stop() {
+        if (!this.#simpleUser) return;
+        try {
+            await this.#simpleUser.hangup();
+        } catch (error) {
+            console.error('Error hanging up:', error);
         }
     }
 
     /**
      * Disconnect the phone
      */
-    disconnect() {
-        if (this.#sipPhone && this.#sipPhone.state !== CallStatus.NULL) {
-            console.log('Removing old connection');
+    async disconnect() {
+        if (!this.#simpleUser) return;
+        try {
+            await this.#simpleUser.disconnect();
+            this.#simpleUser = null;
+            this.#notifyListener('disconnected');
+        } catch (error) {
+            console.error('Error disconnecting:', error);
         }
-        this.#sipPhone = null;
-        this.#notifyListener('disconnected');
     }
 
     /**
      * Get current call state
-     * @returns {number|null} Current call state or null if no phone instance
+     * @returns {string|null} Current call state or null if no call
      */
     getState() {
-        return this.#sipPhone?.state ?? null;
+        return this.#simpleUser?.state ?? null;
     }
 
     /**
      * Send DTMF tone
      * @param {string} key - DTMF key to send
      */
-    sendDTMF(key) {
-        return this.#sipPhone?.sendDTMF(key) ?? null;
+    async sendDTMF(key) {
+        try {
+            await this.#simpleUser?.sendDTMF(key);
+        } catch (error) {
+            console.error('Error sending DTMF:', error);
+        }
     }
 
     /**
      * Answer incoming call
      */
-    answer() {
-        this.#sipPhone?.answer();
+    async answer() {
+        try {
+            await this.#simpleUser?.answer();
+        } catch (error) {
+            console.error('Error answering call:', error);
+        }
     }
 
     /**
      * Set mute state
      * @param {boolean} value - True to mute, false to unmute
      */
-    setMute(value) {
-        if (this.#sipPhone) {
-            value ? this.#sipPhone.mute() : this.#sipPhone.unmute();
+    async setMute(value) {
+        try {
+            if (value) {
+                await this.#simpleUser?.mute();
+            } else {
+                await this.#simpleUser?.unmute();
+            }
+        } catch (error) {
+            console.error('Error setting mute:', error);
         }
     }
 
@@ -220,9 +268,15 @@ class CallController {
      * Set hold state
      * @param {boolean} value - True to hold, false to unhold
      */
-    setHold(value) {
-        if (this.#sipPhone) {
-            value ? this.#sipPhone.hold() : this.#sipPhone.unhold();
+    async setHold(value) {
+        try {
+            if (value) {
+                await this.#simpleUser?.hold();
+            } else {
+                await this.#simpleUser?.unhold();
+            }
+        } catch (error) {
+            console.error('Error setting hold:', error);
         }
     }
 }

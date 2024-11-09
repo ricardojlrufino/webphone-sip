@@ -8,7 +8,7 @@ import inject from "@rollup/plugin-inject";
     
     server:{
       port: 4001,
-      hmr: false
+      hmr: true
     },
     plugins: [
        inject({   // => that should be first under plugins array
@@ -17,6 +17,6 @@ import inject from "@rollup/plugin-inject";
        })
     ],
     optimizeDeps: {
-      include: ['jquery'],
+      include: ['jquery', 'sip.js'],
     },
   })

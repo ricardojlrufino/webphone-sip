@@ -13,7 +13,7 @@ import 'jquery-localize'
 import AudioVisualizer from './utils/waveform'
 import ConfigPage from './pages/ConfigPage'
 import DialPage from './pages/DialPage'
-import CallController from './CallController'
+import CallController, { CallStatus } from './CallController'
 import Events from './utils/eventEmitter';
 
 
@@ -77,7 +77,7 @@ var AppClass = function () {
             // ===============================    
 
             // btnCall state
-            if (state == "call-out" || state == "connecting" || state == "connecting") {
+            if (state == "call-out" || state == "connecting" ) {
                 $btnCall.addClass("is-loading");
             } else if (state == "disconnected") {
                 $btnCall.removeClass("is-loading");
@@ -98,23 +98,30 @@ var AppClass = function () {
             //  Overlay Status control
             // ===============================    
 
-            if (state == "call-out") {
+            if (state == CallStatus.CALL_OUT) {
 
-                $("#overlay").addClass("active call-out");
+                $("#overlay").addClass("active " + CallStatus.CALL_OUT);
 
-            } else if (state == "call-in") {
+            } else if (state == CallStatus.CALL_IN) {
 
-                $("#overlay").addClass("active call-in");
-                $("#overlay .subtitle").text(e.remoteIdentity.displayName);
+                $("#overlay").addClass("active " + CallStatus.CALL_IN);
+                $("#overlay .subtitle").text(e.from.displayName);
+
+            // } else if (state == CallStatus.ESTABLISHED) {
+
+            //     $("#overlay").addClass("active " + CallStatus.ESTABLISHED);
+            //     // $("#overlay .subtitle").text(e.from.displayName);
 
             } else {
 
-                $("#overlay").removeClass("active call-in call-out config");
-
+                $("#overlay").removeClass("active config call-in call-out call-established ");
+                
             }
 
-            // Wave
-            if (state == "connected") {
+            // ===============================    
+            // AudioVisualizer
+            // ===============================    
+            if (state == CallStatus.ESTABLISHED) {
                 setTimeout(function () {
                     AudioVisualizer.start();
                 }, 1000); // wait for remote media stream

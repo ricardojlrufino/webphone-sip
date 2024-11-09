@@ -77,7 +77,7 @@ html{
   color: white;
 }
 
-#phoneStatus.phoneStatus-registered, #phoneStatus.phoneStatus-connected{
+#phoneStatus.phoneStatus-registered, #phoneStatus.phoneStatus-connected, #phoneStatus.phoneStatus-call-established{
 		background-color: #23d160 !important;
 }
 
@@ -163,7 +163,7 @@ footer.call-active #controls-call-active{
 
 #overlay ul li a:hover,
 #overlay ul li a:focus {
-	color: #849368;
+	filter: brightness(85%);
 }
 
 #overlay{
@@ -209,6 +209,7 @@ footer.call-active #controls-call-active{
   display: none;
 }
 
+
 #overlay.call-in #nav-call-in {
   display: block;
 }
@@ -217,11 +218,19 @@ footer.call-active #controls-call-active{
   display: block;
 }
 
+#overlay.call-established #nav-call-established {
+  display: block;
+}
+
+
 /* ---------------- Call animation  ---------------- */
 
 .calling{
-	top: 17px;
-	left: 65px;
+	margin: 0;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
 
 .calling.ball-scale-multiple > div {

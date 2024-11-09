@@ -5,7 +5,7 @@
     "tab_history" : "Histórico",
     "tab_config" : "Config.",
 
-    "phoneNumber_field" : "Discar Número",
+    "phoneNumber_field" : "Discar Contato",
     "username" : "Usuário",
     "password" : "Senha",
     "domain" : "Domínio",
@@ -17,6 +17,7 @@
     "status_ended" : "Finalizada",
     "status_connected" : "Conectado",
     "status_registered" : "Online",
+    "status_call_established": "Em chamada",
     "status_call_in" : "Nova Chamada",
     "status_call_out" : "Discando",
     "status_unregistered" : "Off-Line / Logout",
@@ -25,6 +26,7 @@
 
     "cal_in" : "Recebendo Chamada",
     "cal_out" : "Discando...",
+    "call_established" : "Em Chamada",
     "cancel" : "Cancelar",
     "save" : "Salvar",
     "clean" : "Limpar",

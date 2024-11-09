@@ -1,6 +1,6 @@
 {
   "name": "webphone-sip",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "",
   "type": "module",
   "main": "index.js",
@@ -15,7 +15,7 @@
     "bulma": "^0.6.0",
     "jquery": "^3.2.1",
     "jquery-localize": "^0.1.0",
-    "sip.js": "^0.8.3",
+    "sip.js": "^0.21.2",
     "wolfy87-eventemitter": "^5.2.3"
   },
   "devDependencies": {
