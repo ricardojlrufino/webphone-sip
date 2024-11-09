@@ -16,9 +16,8 @@ It allows you to make calls using your browser in an extremely productive way.
 
 ### TODO 
 * Call History
-* WebPack build
 * Receive Calls "in Backgruound"
-
+* Desktop Notifications
 
 ## Chrome Extension
 
@@ -32,13 +31,21 @@ I did a free version (hosted in github) that is used by the chrome extension (as
 If you improve this code, automatically it's reflected in the extension.  
 Please send me feedback if you will use. ;)  
 
-### Requirements
-* Chrome / Firefox
-* [FreeSwitch](https://freeswitch.org/confluence/display/FREESWITCH/Linux) (+WebRTC)  ([guide](https://sipjs.com/guides/server-configuration/freeswitch/))
-* Need Https (see)
+### Guides
 
+* [FusionPBX + FreeSwitch + SSL](./docs/fusionpbx-guide.md)
+* nvoip.com.br Provider: (_Use Domain: app.nvoip.com.br and Server: app.nvoip.com.br:7443_)
+* [SIP.js server guides](https://sipjs.com/guides/server-configuration/)
+
+### Requirements
+* Need Https and WebRTC
+* FreeSwitch
 
 PS: I have not done any testing using asterisk so far
 
 
+## Compile e Testing
+
+> npm install
+> npm start
 
