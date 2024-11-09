@@ -4,6 +4,9 @@
  * @author Ricardo JL Rufino
  * @singleton
  */
+
+
+
 var AudioVisualizer = (function () {
 
     var started = false;
@@ -34,7 +37,7 @@ var AudioVisualizer = (function () {
             navigator.msGetUserMedia);
 
 
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         var source;
         var stream;
 
@@ -161,3 +164,5 @@ var AudioVisualizer = (function () {
     return this;
 
 }).call({}); // create singleton instance
+
+export default AudioVisualizer;

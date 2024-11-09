@@ -16,7 +16,7 @@
 
     "status_ended" : "Finalizada",
     "status_connected" : "Conectado",
-    "status_registered" : "Ativo",
+    "status_registered" : "Online",
     "status_call_in" : "Nova Chamada",
     "status_call_out" : "Discando",
     "status_unregistered" : "Off-Line / Logout",

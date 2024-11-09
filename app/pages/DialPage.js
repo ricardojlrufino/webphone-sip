@@ -1,18 +1,24 @@
+import $ from 'jquery'
+
+import DTMFAudio from '../utils/dtmf'
+import CallController from '../CallController'
+import Events from '../utils/eventEmitter';
+
 var DialPage = (function () {
     
     var $el = null;
     var $btnCall, $phoneNumber;
     var callActive = false;
 
-    var public  = {};
+    var _public  = {};
 
-    public.init = function (el) {
+    _public.init = function (el) {
         
         $el = el;
 
-        App.on('call::state_change', onCallStateChange);
+        Events.on('call::state_change', onCallStateChange);
 
-        DTMFAudio.init(); // init audio buffers
+        // DTMFAudio.init(); // init audio buffers
 
         $btnCall = $("#btnCall");
         $phoneNumber = $("#phoneNumber");
@@ -77,7 +83,7 @@ var DialPage = (function () {
 
     };
 
-    public.show = function () {
+    _public.show = function () {
         // none
     };
 
@@ -127,6 +133,10 @@ var DialPage = (function () {
         
     }
     
-    return public;
+    return _public;
 
 })();
+
+window.app.DialPage = DialPage; // uo use in eval like
+
+export default DialPage;

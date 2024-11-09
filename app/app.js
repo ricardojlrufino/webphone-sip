@@ -1,9 +1,20 @@
+import $ from 'jquery'
+window.$ = window.jQuery = $;
+import 'jquery-localize'
+
+//import EventEmitter from 'wolfy87-eventemitter'
+import AudioVisualizer from './utils/waveform'
+import ConfigPage from './ConfigPage'
+import DialPage from './DialPage'
+import CallController from './CallController'
+import Events from './utils/eventEmitter';
+
 /**
  * @singleton
  */
 var AppClass = function () {
 
-    EventEmitter.call(this); // Make App a event-emiter
+    // EventEmitter.call(this); // Make App a event-emiter
 
     // Maximum number of event listeners (used to prevent memory leaks and dumb code) 
     this.maxListeners = 20;
@@ -41,7 +52,7 @@ var AppClass = function () {
 
 
         // Show dial after configuration
-        App.on('config::registered', function () {
+        Events.on('config::registered', function () {
             DialPage.init($("#DialPage"));
             CallController.setListener(onCallStateChange);
             
@@ -49,7 +60,7 @@ var AppClass = function () {
             $("[data-tab='DialPage']").click();
         });
 
-        App.on('call::state_change', function (state, e) {
+        Events.on('call::state_change', function (state, e) {
 
             var $btnCall = $("#btnCall");
 
@@ -122,7 +133,7 @@ var AppClass = function () {
 
     function onCallStateChange(state, e){
         // Broadcast event
-        App.emit('call::state_change', state, e);
+        Events.emit('call::state_change', state, e);
     }
 
     /**
@@ -130,7 +141,8 @@ var AppClass = function () {
      */
     function setupTabs(){
 
-        $(".tabs a").click(function(){
+        $(".tabs a").on('click', function(){
+
 
             var $this = $(this);
 
@@ -140,39 +152,35 @@ var AppClass = function () {
 
             $(".tab-content").hide(); // hideall
 
-           
-
             var tab = $this.data('tab');
             var $tab = $("#"+tab);
             $this.parent().addClass('is-active');
 
             if($tab.data("loaded")){
                 $tab.show();
-                eval(tab+".show();"); // Dynamic call show
+                window.app[tab].show();
             }else{
                 $tab.load("pages/"+tab+".html",function() {
                     $tab.show();
                     $tab.data("loaded", true);
 
-                    eval(tab+".init($tab);"); // Dynamic call init
-                    eval(tab+".show();"); // Dynamic call show
+                    window.app[tab].init($tab);
+                    window.app[tab].show();
 
                     // Load translation ($loc)
-                    $("[data-localize]", $tab).localize("locales/app");
+                    // $("[data-localize]", $tab).localize("locales/app");
                 });
             }
-
         });
     }
-
 };
 
-// Extends EventEmitter (event-drive system)
-AppClass.prototype = Object.create(EventEmitter.prototype);
-AppClass.prototype.constructor = AppClass;
 var App = new AppClass();
 
+window.app.App = App;
+
 $(function () {
+
 
     // Load translation ($loc)
     $("[data-localize]").localize("locales/app", {

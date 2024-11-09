@@ -1,26 +1,31 @@
+import $ from 'jquery'
+import CallController from '../CallController'
+import Events from '../utils/eventEmitter';
 
 var ConfigPage = (function () {
     
     var $el = null;
 
-    var public  = {};
+    var _public  = {};
 
     var listenerStateChange = function(state){
 
         // Broadcast event
-        App.emit('call::state_change', state);
+        Events.emit('call::state_change', state);
 
         if(state == 'registered'){
-            localStorage.setItem('config.registered',true);
-            App.emit('config::registered');
+            localStorage.setItem('config.registered', true);
+            Events.emit('config::registered');
         }
 
     }
     
-    public.init = function (el) {
+    _public.init = function (el) {
         $el = el;
 
-        $('form', $el).submit(function(e){
+        $('form', $el).on('submit', function(e){
+
+            alert('ok');
 
             e.preventDefault();
 
@@ -31,7 +36,7 @@ var ConfigPage = (function () {
                 password: $($el).find('[name="password"]').val()
             };
 
-            config.version = App.version;
+            config.version = window.app.App.version;
 
             localStorage.setItem('sip.account', JSON.stringify(config));
 
@@ -44,7 +49,7 @@ var ConfigPage = (function () {
 
         $('input[type=file]', $el).on('change',loadFromFile);
 
-        $('.btnCancel', $el).click(function(){
+        $('.btnCancel', $el).on('click', function(){
             CallController.disconnect();
             localStorage.removeItem('sip.account');
             localStorage.removeItem('config.registered');
@@ -54,7 +59,7 @@ var ConfigPage = (function () {
 
     }
 
-    public.show = function () {
+    _public.show = function () {
         
         loadConfig();
 
@@ -80,6 +85,10 @@ var ConfigPage = (function () {
         };
     }
 
-    return public;
+    return _public;
 
 })();
+
+window.app.ConfigPage = ConfigPage;
+
+export default ConfigPage;

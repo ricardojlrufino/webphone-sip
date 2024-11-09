@@ -2,10 +2,13 @@
   "name": "webphone-sip",
   "version": "1.0.0",
   "description": "",
+  "type": "module",
   "main": "index.js",
   "scripts": {
-    "start": "python -m SimpleHTTPServer 5000",
-    "build": "gulp build:production"
+    "start": "cd dist && python -m http.server 5000",
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
   },
   "keywords": [],
   "author": "Ricardo JL Rufino",
@@ -16,5 +19,9 @@
     "jquery-localize": "^0.1.0",
     "sip.js": "^0.8.3",
     "wolfy87-eventemitter": "^5.2.3"
+  },
+  "devDependencies": {
+    "@rollup/plugin-inject": "^5.0.5",
+    "vite": "^5.4.10"
   }
 }

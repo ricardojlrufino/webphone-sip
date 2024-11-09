@@ -16,9 +16,9 @@ var DTMFAudio = (function () {
 
     this.audioCtx = null;
     this.volCtl = null;
-    this.var_DTMF_buffer = new Object();
-    this.var_DTMF_mix_list = new Object();
-    this.var_Precise_Tone_Plan_buffer = new Object();
+    this.var_DTMF_buffer = {};
+    this.var_DTMF_mix_list = {};
+    this.var_Precise_Tone_Plan_buffer = {};
     this.var_source = null;
 
     this.var_dial_isdialing = false;
@@ -37,6 +37,7 @@ var DTMFAudio = (function () {
             this.volCtl.connect(this.audioCtx.destination)
         }
         catch (e) {
+            console.log(e);
             alert('Web Audio API is not supported in this browser, We recommend You Download a Copy of Mozilla Firefox or Google Chrome!');
         }
         this.PopulateDTMFBuffer();
@@ -46,7 +47,7 @@ var DTMFAudio = (function () {
     this.MakeDTMFSineBuffer = function (frequencyA, frequencyB) {
         var buffer = this.audioCtx.createBuffer(1, this.const_sine_samples, this.const_audio_sample_rate);
         var channel = buffer.getChannelData(0);
-        for (i = 0; i < this.const_sine_samples; ++i) {
+        for (var i = 0; i < this.const_sine_samples; ++i) {
             channel[i] = Math.sin((frequencyA * 2 * Math.PI * i) / this.const_audio_sample_rate) + Math.sin((frequencyB * 2 * Math.PI * i) / this.const_audio_sample_rate);
         }
         return buffer;
@@ -69,7 +70,7 @@ var DTMFAudio = (function () {
 
         var fillBuffer = function (){
 
-            for (i = 0; i < delay_as_sample; i++) {
+            for (var i = 0; i < delay_as_sample; i++) {
                 if (i <= fade_if_value) {
                     fade_array[i] = (1.0 / fade_if_value) * i;
                 }
@@ -81,7 +82,7 @@ var DTMFAudio = (function () {
                 }
             }
     
-            for (i = 0; i < aux_samples; ++i) {
+            for (var i = 0; i < aux_samples; ++i) {
                 if (i < delay_as_sample) {
                     channel[i] = fade_array[i] * Math.sin((frequencyA * 2 * Math.PI * i) / this.const_audio_sample_rate) + fade_array[i] * Math.sin((frequencyB * 2 * Math.PI * i) / this.const_audio_sample_rate);
                 }
@@ -159,7 +160,7 @@ var DTMFAudio = (function () {
 
         var fade_if_value = Math.floor(delay_as_sample * .10); // 4
 
-        for (i = 0; i < delay_as_sample; i++) {
+        for (var i = 0; i < delay_as_sample; i++) {
             if (i <= fade_if_value) {
                 fade_array[i] = (1.0 / fade_if_value) * i;
             }
@@ -171,7 +172,7 @@ var DTMFAudio = (function () {
             }
         }
 
-        for (i = 0; i < aux_samples; ++i) {
+        for (var i = 0; i < aux_samples; ++i) {
             if (i < delay_as_sample) {
                 channel[i] = fade_array[i] * Math.sin((frequencyA * 2 * Math.PI * i) / this.const_audio_sample_rate) + fade_array[i] * Math.sin((frequencyB * 2 * Math.PI * i) / this.const_audio_sample_rate) + fade_array[i] * Math.sin((frequencyC * 2 * Math.PI * i) / this.const_audio_sample_rate) + fade_array[i] * Math.sin((frequencyD * 2 * Math.PI * i) / this.const_audio_sample_rate);
             }
@@ -185,12 +186,12 @@ var DTMFAudio = (function () {
     }
 
     this.PopulateDTMFBuffer = function () {
-        buffer_index = 0
-        for (lc = 0; lc < this.const_DTMF_col_frequency.length; lc++) {
-            for (lr = 0; lr < this.const_DTMF_row_frequency.length; lr++) {
-                hash_key = this.const_DTMF_key[buffer_index];
-                frequencyA = this.const_DTMF_row_frequency[lr];
-                frequencyB = this.const_DTMF_col_frequency[lc];
+        var buffer_index = 0
+        for (var lc = 0; lc < this.const_DTMF_col_frequency.length; lc++) {
+            for (var lr = 0; lr < this.const_DTMF_row_frequency.length; lr++) {
+                var hash_key = this.const_DTMF_key[buffer_index];
+                var frequencyA = this.const_DTMF_row_frequency[lr];
+                var frequencyB = this.const_DTMF_col_frequency[lc];
 
                 this.var_DTMF_buffer[hash_key] = this.MakeDTMFSineBuffer(frequencyA, frequencyB);
                 this.var_DTMF_mix_list[hash_key] = new Array(frequencyA, frequencyB);
@@ -251,16 +252,22 @@ var DTMFAudio = (function () {
     }
 
     this.play = function (key) {
+
+        if(!this.audioCtx) this.init();
+
         this.generateDTMF(key);
-        _this = this;
+        var _this = this;
         setTimeout(function () {
             _this.stopDTMF();
         }, 100);
     }
 
     this.playCustom = function (key) {
+        
+        if (!this.audioCtx) this.init();
+
         if (!(key in this.var_Precise_Tone_Plan_buffer)) {
-            alert("Precise Tone has no : " + key);
+            alert("[DTMF.playCustom] Precise Tone has no : " + key);
             return;
         }
 
@@ -271,11 +278,11 @@ var DTMFAudio = (function () {
         // this.var_source.connect(this.audioCtx.destination);
         this.var_source.connect(this.volCtl);
 
-        buffer = this.var_Precise_Tone_Plan_buffer[key];
-
-        this.var_source.buffer = buffer;
+        this.var_source.buffer = this.var_Precise_Tone_Plan_buffer[key];
         this.var_source.start(0);
     }
 
     return this;
 }).call({}); // create singleton instance
+
+export default DTMFAudio;

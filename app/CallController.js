@@ -1,3 +1,5 @@
+import $ from 'jquery'
+import SIP from 'sip.js'
 
 /**
  * Controll calling processes and interact with SIP.js
@@ -17,15 +19,15 @@ var CallController = (function () {
 
     var accountConfig;
 
-    var public  = {};
+    var _public  = {};
 
-    public.init = function (config, listener) {
+    _public.init = function (config, listener) {
         accountConfig = config;
         callListener = listener;
         initPhone();
     };
 
-    public.setListener = function (listener) {
+    _public.setListener = function (listener) {
         callListener = listener;
     };
 
@@ -45,7 +47,7 @@ var CallController = (function () {
         }
 
         var config = {
-            uri: accountConfig.username + '@' + accountConfig.domain,
+            uri: accountConfig.username + accountConfig.domain,
             wsServers: ['wss://' + accountConfig.proxy], // +':7443'
             authorizationUser: accountConfig.user,
             password: accountConfig.password,
@@ -104,7 +106,7 @@ var CallController = (function () {
         callListener('connecting', sipPhone);  
     }
 
-    public.call = function(number){
+    _public.call = function(number){
         
         var fixed = number.replace(/[^a-zA-Z0-9*#/.@]/g,'')
         sipPhone.call(fixed);
@@ -118,7 +120,7 @@ var CallController = (function () {
         // if(sipPhone) sipPhone.stop();
     } 
 
-    public.stop = function(){
+    _public.stop = function(){
         if(sipPhone){
             if(sipPhone.state == 1){ // new
                 sipPhone.reject();
@@ -128,35 +130,34 @@ var CallController = (function () {
        }
     } 
 
-    public.disconnect = function(){
+    _public.disconnect = function(){
         if(sipPhone && sipPhone.state != C.STATUS_NULL){
             console.log("removing old connection");
         }
-        delete sipPhone;
         sipPhone = null;
         if(callListener) callListener('disconnected');  
     } 
 
-    public.getState = function(){
+    _public.getState = function(){
         if(sipPhone) return sipPhone.state;
         return null;
     }
 
-    public.sendDTMF = function(key){
+    _public.sendDTMF = function(key){
         if(sipPhone) return sipPhone.sendDTMF(key);
         return null;
     }
 
-    public.answer = function(){
+    _public.answer = function(){
         if(sipPhone) return sipPhone.answer();
     }
 
-    public.setMute = function(value){
+    _public.setMute = function(value){
         if(value) sipPhone.mute();
         else sipPhone.unmute();
     }
 
-    public.setHold = function(value){
+    _public.setHold = function(value){
         if(value) sipPhone.hold();
         else sipPhone.unhold();
     }
@@ -168,6 +169,8 @@ var CallController = (function () {
         //     }
         //  },    
     
-    return public;
+    return _public;
 
 })();
+
+export default CallController;
