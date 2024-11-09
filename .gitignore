@@ -58,3 +58,4 @@ typings/
 # dotenv environment variables file
 .env
 chrome-extension/chrome-extension.zip
+NOTAS_PRIVADAS.md

@@ -1,142 +1,253 @@
-import $ from 'jquery'
+/*
+* Copyright (c) 2017-2024 Ricardo JL Rufino - Edu3 LTDA
+* 
+* This software is released under the MIT License.
+* https://opensource.org/licenses/MIT
+*/
 
-import DTMFAudio from '../utils/dtmf'
-import CallController from '../CallController'
+import $ from 'jquery';
+import DTMFAudio from '../utils/dtmf';
+import CallController from '../CallController';
 import Events from '../utils/eventEmitter';
 
-var DialPage = (function () {
-    
-    var $el = null;
-    var $btnCall, $phoneNumber;
-    var callActive = false;
+class DialPage {
+    #element = null;
+    #isCallActive = false;
+    #elements = {
+        btnCall: null,
+        phoneNumber: null,
+        btnMute: null,
+        btnHold: null,
+        btnStopCall: null,
+        status: null,
+        footer: null,
+        callerDigits: null,
+        controlsCallActive: null
+    };
 
-    var _public  = {};
+    /**
+     * Initialize the dial page
+     * @param {HTMLElement} element - Root element for the dial page
+     */
+    init = (element) => {
+        this.#element = element;
+        this.#cacheElements();
+        this.#setupEventListeners();
+    }
 
-    _public.init = function (el) {
-        
-        $el = el;
+    /**
+     * Cache DOM elements for better performance
+     * @private
+     */
+    #cacheElements = () => {
+        const elements = this.#elements;
+        elements.btnCall = $('#btnCall');
+        elements.phoneNumber = $('#phoneNumber');
+        elements.btnMute = $('#btnMute');
+        elements.btnHold = $('#btnHold');
+        elements.btnStopCall = $('#btnStopCall');
+        elements.status = $('#phoneStatus');
+        elements.footer = $('footer');
+        elements.callerDigits = $('#caller-digits');
+        elements.controlsCallActive = $('#controls-call-active');
+    }
 
-        Events.on('call::state_change', onCallStateChange);
+    /**
+     * Set up all event listeners
+     * @private
+     */
+    #setupEventListeners = () => {
+        Events.on('call::state_change', this.#onCallStateChange);
 
-        // DTMFAudio.init(); // init audio buffers
+        // Phone number input events
+        this.#elements.phoneNumber.on('keyup', this.#handleKeyUp);
 
-        $btnCall = $("#btnCall");
-        $phoneNumber = $("#phoneNumber");
-        $phoneNumber.keyup(function (e) {
-            if (e.keyCode == 13) $btnCall.trigger("click");
-            if (e.keyCode == 38 || e.keyCode == 40) { // up-down
-                $phoneNumber.val(localStorage.getItem('dial.lastNumber'));
+        // Control button events
+        this.#setupControlButtons();
+
+        // Caller digits events
+        this.#elements.callerDigits.find('a').on('click', this.#handleDigitClick);
+    }
+
+    /**
+     * Set up control button event listeners
+     * @private
+     */
+    #setupControlButtons = () => {
+        // Setup mute button
+        this.#elements.btnMute.on('click', () =>
+            this.#toggleControlButton('Mute', (active) => CallController.setMute(active)));
+
+        // Setup hold button
+        this.#elements.btnHold.on('click', () =>
+            this.#toggleControlButton('Hold', (active) => CallController.setHold(active)));
+
+        // Setup stop button
+        this.#elements.btnStopCall.on('click', () => CallController.stop());
+
+        // Setup call button
+        this.#elements.btnCall.on('click', this.#handleCallButton);
+    }
+
+    /**
+     * Toggle control button state and execute associated action
+     * @private
+     */
+    #toggleControlButton = (buttonName, action) => {
+        const button = this.#elements[`btn${buttonName}`];
+        const newState = !(button.data('active') || false);
+
+        action(newState);
+        button.data('active', newState);
+        button.toggleClass('is-outlined', !newState);
+    }
+
+    /**
+     * Handle phone number input keyup events
+     * @private
+     */
+    #handleKeyUp = (event) => {
+        const { keyCode } = event;
+        const { phoneNumber } = this.#elements;
+
+        if (keyCode === 13) { // Enter key
+            this.#elements.btnCall.trigger('click');
+        } else if (keyCode === 38 || keyCode === 40) { // Up/Down arrows
+            const lastNumber = localStorage.getItem('dial.lastNumber');
+            if (lastNumber) {
+                phoneNumber.val(lastNumber);
             }
-        });
+        }
+    }
 
-
-        $("#btnMute").on('click', function(){
-            var activate = ! ($(this).data('active') || false);
-            CallController.setMute(activate);
-            $(this).data('active', activate)
-            if(activate){
-                $(this).removeClass("is-outlined");
-            }else{
-                $(this).addClass("is-outlined");
-            }
-        });
-
-        $("#btnHold").on('click', function(){
-            var activate = ! ($(this).data('active') || false);
-            CallController.setHold(activate);
-            $(this).data('active', activate)
-            if(activate){
-                $(this).removeClass("is-outlined");
-            }else{
-                $(this).addClass("is-outlined");
-            }
-        });
-
-        $("#btnStopCall").on('click', function(){
+    /**
+     * Handle call button click
+     * @private
+     */
+    #handleCallButton = () => {
+        if (this.#isCallActive) {
             CallController.stop();
-        });
-    
-        $btnCall.on('click', function(){
-
-            if(callActive){
-                CallController.stop();
-            }else{
-                var number = $phoneNumber.val();
+        } else {
+            const number = this.#elements.phoneNumber.val();
+            if (number) {
                 localStorage.setItem('dial.lastNumber', number);
                 CallController.call(number);
             }
-
-        });
-
-        // Play tones
-        $("#caller-digits a").click(function(){
-            var text = $(this).text();
-
-            DTMFAudio.play(text);
-
-            if(callActive) CallController.sendDTMF(text);
-            else{
-                $phoneNumber.val($phoneNumber.val() + text);
-            }
-
-        });
-
-    };
-
-    _public.show = function () {
-        // none
-    };
-
-    function onCallStateChange(state, e){
-        
-        var $status = $("#phoneStatus");
-        $status.html($loc['status_'+state.replace("-", "_")]);
-        $status.attr('class', 'tag phoneStatus-'+state);
-
-        // General status
-        if(state == "connected"){
-            callActive = true;
-            $("footer").addClass('call-active');
-            $("#controls-call-active .button").data("active", false); // reset state
-        }else{
-            callActive = false;
-            $("footer").removeClass('call-active');
         }
-
-        // Sound Interactions
-        if(state == "call-out"){
-
-            DTMFAudio.playCustom('dial');
-
-        }else if(state == "call-in"){
-            
-            DTMFAudio.playCustom('ringback');
-
-        }else if(state == "ended"){
-            
-            DTMFAudio.playCustom('howler');
-
-            setTimeout(function(){
-                DTMFAudio.stop();
-            },1000);
-
-        }else{
-            DTMFAudio.stop();
-        }
-
-        // Block keypad and show 
-        if(callActive){
-
-            // SHOW CONTROL OPTIONS (MUTE, HOLD, END, TRANSFER) IN NUMBER
-            // NUMBERS SEND DTMF TONES
-        }
-        
     }
-    
-    return _public;
 
-})();
+    /**
+     * Handle digit button clicks
+     * @private
+     */
+    #handleDigitClick = (event) => {
+        const digit = $(event.currentTarget).text();
 
-window.app.DialPage = DialPage; // uo use in eval like
+        // Play DTMF tone
+        DTMFAudio.play(digit);
 
-export default DialPage;
+        if (this.#isCallActive) {
+            CallController.sendDTMF(digit);
+        } else {
+            const currentValue = this.#elements.phoneNumber.val();
+            this.#elements.phoneNumber.val(currentValue + digit);
+        }
+    }
+
+    /**
+     * Handle call state changes
+     * @private
+     */
+    #onCallStateChange = (state, event) => {
+        this.#updateStatus(state);
+        this.#handleCallState(state);
+        this.#handleAudio(state);
+    }
+
+    /**
+     * Update status display
+     * @private
+     */
+    #updateStatus = (state) => {
+        const displayState = state.replace('-', '_');
+        this.#elements.status
+            .html($loc[`status_${displayState}`])
+            .attr('class', `tag phoneStatus-${state}`);
+    }
+
+    /**
+     * Handle call state changes
+     * @private
+     */
+    #handleCallState = (state) => {
+        const isConnected = state === 'connected';
+        this.#isCallActive = isConnected;
+
+        this.#elements.footer.toggleClass('call-active', isConnected);
+
+        if (isConnected) {
+            // Reset control buttons state
+            this.#elements.controlsCallActive
+                .find('.button')
+                .data('active', false)
+                .addClass('is-outlined');
+        }
+    }
+
+    /**
+     * Handle audio based on call state
+     * @private
+     */
+    #handleAudio = (state) => {
+        switch (state) {
+            case 'call-out':
+                DTMFAudio.playCustom('dial');
+                break;
+
+            case 'call-in':
+                DTMFAudio.playCustom('ringback');
+                break;
+
+            case 'ended':
+                DTMFAudio.playCustom('howler');
+                setTimeout(() => DTMFAudio.stop(), 1000);
+                break;
+
+            default:
+                DTMFAudio.stop();
+        }
+    }
+
+    /**
+     * Reset page state
+     * @private
+     */
+    #resetPageState = () => {
+        this.#isCallActive = false;
+        this.#elements.footer.removeClass('call-active');
+        this.#elements.controlsCallActive.find('.button')
+            .data('active', false)
+            .addClass('is-outlined');
+    }
+
+    /**
+     * Show the dial page
+     * @public
+     */
+    show = () => {
+        this.#resetPageState();
+        const lastNumber = localStorage.getItem('dial.lastNumber');
+        if (lastNumber) {
+            this.#elements.phoneNumber.val(lastNumber);
+        }
+    }
+}
+
+// Create singleton instance
+const dialPage = new DialPage();
+
+// For legacy support
+window.app = window.app || {};
+window.app.DialPage = dialPage;
+
+export default dialPage;

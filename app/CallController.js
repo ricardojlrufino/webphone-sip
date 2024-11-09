@@ -1,61 +1,76 @@
-import $ from 'jquery'
-import SIP from 'sip.js'
+/*
+* Copyright (c) 2017-2024 Ricardo JL Rufino - Edu3 LTDA
+* 
+* This software is released under the MIT License.
+* https://opensource.org/licenses/MIT
+*/
 
-/**
- * Controll calling processes and interact with SIP.js
- */
-var CallController = (function () {
+import $ from 'jquery';
+import SIP from 'sip.js';
 
-    var C = {
-        STATUS_NULL:         0,
-        STATUS_NEW:          1,
-        STATUS_CONNECTING:   2,
-        STATUS_CONNECTED:    3,
-        STATUS_COMPLETED:    4
-    };
+const CallStatus = Object.freeze({
+    NULL: 0,
+    NEW: 1,
+    CONNECTING: 2,
+    CONNECTED: 3,
+    COMPLETED: 4
+});
 
-    var sipPhone; // SIP.js
-    var callListener; // Send notifications to DialPage (call-in, call-out, etc...)
+class CallController {
+    #sipPhone;
+    #callListener;
+    #accountConfig;
 
-    var accountConfig;
+    constructor() {
+        this.#sipPhone = null;
+        this.#callListener = null;
+        this.#accountConfig = null;
 
-    var _public  = {};
+        // Bind methods to preserve 'this' context
+        this.onUnloadPage = this.onUnloadPage.bind(this);
+    }
 
-    _public.init = function (config, listener) {
-        accountConfig = config;
-        callListener = listener;
-        initPhone();
-    };
+    /**
+     * Initialize the call controller with configuration and event listener
+     * @param {Object} config - Account configuration object
+     * @param {Function} listener - Callback function for call events
+     */
+    init(config, listener) {
+        this.#accountConfig = config;
+        this.#callListener = listener;
+        this.#initPhone();
+    }
 
-    _public.setListener = function (listener) {
-        callListener = listener;
-    };
+    /**
+     * Set a new event listener
+     * @param {Function} listener - Callback function for call events
+     */
+    setListener(listener) {
+        this.#callListener = listener;
+    }
 
-    function initPhone(){
+    /**
+     * Initialize SIP phone instance and set up event listeners
+     * @private
+     */
+    #initPhone() {
 
-        if(sipPhone){
-            alert("WARN: OLD call not finished !!");
+        if (this.#sipPhone) {
+            console.warn('Warning: Previous call not finished!');
             return false;
         }
-        
-        // create audio tag if not exist
-        var remoteAudio = document.getElementById("remoteAudio");
-        if(!remoteAudio){
-            var remoteAudio      = document.createElement('audio');
-            remoteAudio.id       = 'remoteAudio';
-            document.body.appendChild(remoteAudio);
-        }
 
-        var config = {
-            uri: accountConfig.username + accountConfig.domain,
-            wsServers: ['wss://' + accountConfig.proxy], // +':7443'
-            authorizationUser: accountConfig.user,
-            password: accountConfig.password,
-            userAgentString : 'WebPhone/'+accountConfig.version
+        const config = {
+            uri: `${this.#accountConfig.username}@${this.#accountConfig.domain}`,
+            wsServers: [`wss://${this.#accountConfig.proxy}`],  // :7443
+            authorizationUser: this.#accountConfig.user,
+            password: this.#accountConfig.password,
+            userAgentString: `WebPhone/${this.#accountConfig.version}`
         };
 
         try {
-            sipPhone = new SIP.WebRTC.Simple({
+            const remoteAudio = this.#getRemoteAudioElement();
+            this.#sipPhone = new SIP.WebRTC.Simple({
                 media: {
                     remote: {
                         audio: remoteAudio
@@ -63,114 +78,153 @@ var CallController = (function () {
                 },
                 ua: config
             });
+
+            this.#setupEventListeners();
+            window.addEventListener('unload', this.onUnloadPage);
+
+            this.#notifyListener('connecting', this.#sipPhone);
         } catch (error) {
-            console.error(error);
-            alert("ERROR:" +error.message);
+            console.error('Failed to initialize SIP phone:', error);
             throw error;
         }
-    
-
-        window.onunload = onunloadPage;
-
-        sipPhone.on('connected', function(e){ 
-            callListener('connected', e);  
-            // e.sessionDescriptionHandler.peerConnection
-            // if (pc.getRemoteStreams) {
-            //     remoteStream = pc.getRemoteStreams()[0];
-            //   }
-        });
-        sipPhone.on('registered', function(e){ 
-            callListener('registered', e);  
-            localStorage.setItem("sip.registered", true);
-        });
-        sipPhone.on('unregistered', function(e){ 
-            callListener('unregistered', e);  
-            localStorage.setItem("sip.registered", false);
-        });
-        sipPhone.on('registrationFailed', function(e){ 
-            callListener('registrationFailed', e); 
-            localStorage.setItem("sip.registered", false);
-        });
-        sipPhone.on('ringing', function(e){ 
-            callListener('call-in', e);  
-        } );
-        sipPhone.on('disconnected', function(e){ 
-            callListener('disconnected', e);  
-        });
-        sipPhone.on('ended', function(e){callListener('ended', e);   });
-
-        // WebSocket events
-        sipPhone.ua.on('disconnected', function(e){ callListener('disconnected', e);  });
-        sipPhone.ua.on('connecting', function(e){ callListener('connecting', e);  });
-
-        callListener('connecting', sipPhone);  
     }
 
-    _public.call = function(number){
-        
-        var fixed = number.replace(/[^a-zA-Z0-9*#/.@]/g,'')
-        sipPhone.call(fixed);
-
-        callListener('call-out', number);
-    }
-
-    // Unregister the user agents and terminate all active sessions when the
-    // window closes or when we navigate away from the page
-    function onunloadPage(){
-        // if(sipPhone) sipPhone.stop();
-    } 
-
-    _public.stop = function(){
-        if(sipPhone){
-            if(sipPhone.state == 1){ // new
-                sipPhone.reject();
-            }else{
-                sipPhone.hangup();
-            }
-       }
-    } 
-
-    _public.disconnect = function(){
-        if(sipPhone && sipPhone.state != C.STATUS_NULL){
-            console.log("removing old connection");
+    /**
+     * Ensure remote audio element exists in the DOM
+     * @private
+     */
+    #getRemoteAudioElement() {
+        let remoteAudio = document.getElementById('remoteAudio');
+        if (!remoteAudio) {
+            remoteAudio = document.createElement('audio');
+            remoteAudio.id = 'remoteAudio';
+            document.body.appendChild(remoteAudio);
         }
-        sipPhone = null;
-        if(callListener) callListener('disconnected');  
-    } 
-
-    _public.getState = function(){
-        if(sipPhone) return sipPhone.state;
-        return null;
+        return remoteAudio;
     }
 
-    _public.sendDTMF = function(key){
-        if(sipPhone) return sipPhone.sendDTMF(key);
-        return null;
+    /**
+     * Set up all SIP phone event listeners
+     * @private
+     */
+    #setupEventListeners() {
+        const events = [
+            'connected', 'registered', 'unregistered', 'registrationFailed',
+            'ringing', 'disconnected', 'ended'
+        ];
+
+        events.forEach(event => {
+            this.#sipPhone.on(event, (e) => {
+                const eventName = event === 'ringing' ? 'call-in' : event;
+                this.#notifyListener(eventName, e);
+
+                if (event === 'registered' || event === 'unregistered' || event === 'registrationFailed') {
+                    localStorage.setItem('sip.registered', event === 'registered');
+                }
+            });
+        });
+
+        // WebSocket specific events
+        ['disconnected', 'connecting'].forEach(event => {
+            this.#sipPhone.ua.on(event, (e) => this.#notifyListener(event, e));
+        });
     }
 
-    _public.answer = function(){
-        if(sipPhone) return sipPhone.answer();
+    /**
+     * Notify listener with event
+     * @private
+     */
+    #notifyListener(event, data) {
+        if (this.#callListener) {
+            this.#callListener(event, data);
+        }
     }
 
-    _public.setMute = function(value){
-        if(value) sipPhone.mute();
-        else sipPhone.unmute();
+    /**
+     * Make a call to the specified number
+     * @param {string} number - Phone number to call
+     */
+    call(number) {
+        const sanitizedNumber = number.replace(/[^a-zA-Z0-9*#/.@]/g, '');
+        this.#sipPhone?.call(sanitizedNumber);
+        this.#notifyListener('call-out', number);
     }
 
-    _public.setHold = function(value){
-        if(value) sipPhone.hold();
-        else sipPhone.unhold();
+    /**
+     * Handle page unload event
+     * @private
+     */
+    onUnloadPage() {
+        // Implement cleanup if needed
+        // this.#sipPhone?.stop();
     }
 
-         // // 
-        // toogleHold: function () {
-        //     if(status){
-        //          sipPhone.hold();
-        //     }
-        //  },    
-    
-    return _public;
+    /**
+     * Stop current call
+     */
+    stop() {
+        if (!this.#sipPhone) return;
 
-})();
+        if (this.#sipPhone.state === CallStatus.NEW) {
+            this.#sipPhone.reject();
+        } else {
+            this.#sipPhone.hangup();
+        }
+    }
 
-export default CallController;
+    /**
+     * Disconnect the phone
+     */
+    disconnect() {
+        if (this.#sipPhone && this.#sipPhone.state !== CallStatus.NULL) {
+            console.log('Removing old connection');
+        }
+        this.#sipPhone = null;
+        this.#notifyListener('disconnected');
+    }
+
+    /**
+     * Get current call state
+     * @returns {number|null} Current call state or null if no phone instance
+     */
+    getState() {
+        return this.#sipPhone?.state ?? null;
+    }
+
+    /**
+     * Send DTMF tone
+     * @param {string} key - DTMF key to send
+     */
+    sendDTMF(key) {
+        return this.#sipPhone?.sendDTMF(key) ?? null;
+    }
+
+    /**
+     * Answer incoming call
+     */
+    answer() {
+        this.#sipPhone?.answer();
+    }
+
+    /**
+     * Set mute state
+     * @param {boolean} value - True to mute, false to unmute
+     */
+    setMute(value) {
+        if (this.#sipPhone) {
+            value ? this.#sipPhone.mute() : this.#sipPhone.unmute();
+        }
+    }
+
+    /**
+     * Set hold state
+     * @param {boolean} value - True to hold, false to unhold
+     */
+    setHold(value) {
+        if (this.#sipPhone) {
+            value ? this.#sipPhone.hold() : this.#sipPhone.unhold();
+        }
+    }
+}
+
+export default new CallController();

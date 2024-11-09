@@ -1,20 +1,27 @@
+/*
+* Copyright (c) 2017-2024 Ricardo JL Rufino - Edu3 LTDA
+* 
+* This software is released under the MIT License.
+* https://opensource.org/licenses/MIT
+*/
+
 import $ from 'jquery'
 window.$ = window.jQuery = $;
 import 'jquery-localize'
 
 //import EventEmitter from 'wolfy87-eventemitter'
 import AudioVisualizer from './utils/waveform'
-import ConfigPage from './ConfigPage'
-import DialPage from './DialPage'
+import ConfigPage from './pages/ConfigPage'
+import DialPage from './pages/DialPage'
 import CallController from './CallController'
 import Events from './utils/eventEmitter';
+
+
 
 /**
  * @singleton
  */
 var AppClass = function () {
-
-    // EventEmitter.call(this); // Make App a event-emiter
 
     // Maximum number of event listeners (used to prevent memory leaks and dumb code) 
     this.maxListeners = 20;
@@ -22,12 +29,12 @@ var AppClass = function () {
     this.version = "0.1.2"; // Please also change in chrome-extension/manifest
 
     this.init = function () {
- 
+
         setupTabs();
 
         var registered = localStorage.getItem("config.registered");
 
-        if(registered){
+        if (registered) {
 
             var account = localStorage.getItem("sip.account");
             if (!account) {
@@ -39,14 +46,15 @@ var AppClass = function () {
 
             DialPage.init($("#DialPage"));
 
-        }else{ 
 
-            $("[data-tab='ConfigPage']").click();
+        } else {
+
+            $("[data-tab='ConfigPage']").trigger('click');
 
         }
 
         // Iinit wave form visualizer
-        AudioVisualizer.init($('#phone-waveform')[0],$('#remoteAudio')[0]);
+        AudioVisualizer.init($('#phone-waveform')[0], $('#remoteAudio')[0]);
         // AudioVisualizer.init($('#phone-waveform')[0]);
         // AudioVisualizer.start();
 
@@ -55,9 +63,9 @@ var AppClass = function () {
         Events.on('config::registered', function () {
             DialPage.init($("#DialPage"));
             CallController.setListener(onCallStateChange);
-            
+
             $("[data-tab='DialPage']").removeAttr('disabled');
-            $("[data-tab='DialPage']").click();
+            $("[data-tab='DialPage']").trigger('click');
         });
 
         Events.on('call::state_change', function (state, e) {
@@ -69,20 +77,20 @@ var AppClass = function () {
             // ===============================    
 
             // btnCall state
-            if(state == "call-out" || state == "connecting" || state == "connecting"){
+            if (state == "call-out" || state == "connecting" || state == "connecting") {
                 $btnCall.addClass("is-loading");
-            }else if(state == "disconnected"){
+            } else if (state == "disconnected") {
                 $btnCall.removeClass("is-loading");
-            }else{
+            } else {
                 $btnCall.removeClass("is-loading");
             }
 
             // Connection status ICON
-            if(state == "disconnected"){
-                $btnCall.find(".fa").attr('class','fa fa-chain-broken');
+            if (state == "disconnected") {
+                $btnCall.find(".fa").attr('class', 'fa fa-chain-broken');
                 $btnCall.attr("disabled", "disabled");
-            }else{
-                $btnCall.find(".fa").attr('class','fa fa-phone');
+            } else {
+                $btnCall.find(".fa").attr('class', 'fa fa-phone');
                 $btnCall.removeAttr("disabled");
             }
 
@@ -107,13 +115,13 @@ var AppClass = function () {
 
             // Wave
             if (state == "connected") {
-                setTimeout(function(){
+                setTimeout(function () {
                     AudioVisualizer.start();
-                },1000); // wait for remote media stream
-            }else{
+                }, 1000); // wait for remote media stream
+            } else {
                 AudioVisualizer.stop();
             }
-           
+
         });
 
 
@@ -131,7 +139,7 @@ var AppClass = function () {
         });
     }
 
-    function onCallStateChange(state, e){
+    function onCallStateChange(state, e) {
         // Broadcast event
         Events.emit('call::state_change', state, e);
     }
@@ -139,28 +147,27 @@ var AppClass = function () {
     /**
      * Control Pages / "Routes" 
      */
-    function setupTabs(){
+    function setupTabs() {
 
-        $(".tabs a").on('click', function(){
-
+        $(".tabs a").on('click', function () {
 
             var $this = $(this);
 
-            if($this.is(":disabled") || $this.attr('disabled')) return;
+            if ($this.is(":disabled") || $this.attr('disabled')) return;
 
             $(".tabs li").removeClass('is-active');
 
             $(".tab-content").hide(); // hideall
 
             var tab = $this.data('tab');
-            var $tab = $("#"+tab);
+            var $tab = $("#" + tab);
             $this.parent().addClass('is-active');
 
-            if($tab.data("loaded")){
+            if ($tab.data("loaded")) {
                 $tab.show();
                 window.app[tab].show();
-            }else{
-                $tab.load("pages/"+tab+".html",function() {
+            } else {
+                $tab.load("pages/" + tab + ".html", function () {
                     $tab.show();
                     $tab.data("loaded", true);
 
@@ -192,5 +199,5 @@ $(function () {
             App.init();
         }
     });
-    
+
 });

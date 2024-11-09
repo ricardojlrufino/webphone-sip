@@ -5,10 +5,8 @@
   "type": "module",
   "main": "index.js",
   "scripts": {
-    "start": "cd dist && python -m http.server 5000",
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
+    "start": "vite",
+    "build": "vite build"
   },
   "keywords": [],
   "author": "Ricardo JL Rufino",

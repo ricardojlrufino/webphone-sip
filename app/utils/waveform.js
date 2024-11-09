@@ -4,9 +4,6 @@
  * @author Ricardo JL Rufino
  * @singleton
  */
-
-
-
 var AudioVisualizer = (function () {
 
     var started = false;
