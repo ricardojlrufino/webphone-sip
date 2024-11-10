@@ -18,11 +18,10 @@
     <title>WebPhone</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
     
-    <link rel="stylesheet" href="/node_modules/bulma/css/bulma.css">
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/bulma.override.css">
 
-  </head>
+    <script type="module" crossorigin src="/assets/index-CebE30mn.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-CznR-dTO.css">
+  <script id="vite-plugin-pwa:register-sw" src="/registerSW.js"></script></head>
   <body>
     <div class="app">
         <header>
@@ -191,20 +190,6 @@
     </div>
     
 
-    <script type="module">
-        window.app = {}; // Instances of pages.
 
-        document.addEventListener("DOMContentLoaded", event => {
-            // we can move only if we are not in a browser's tab
-            const isBrowser = matchMedia("(display-mode: browser)").matches;
-            if (!isBrowser) {
-                window.moveTo(window.screen.width - 500, 70);
-                window.resizeTo(500, 550);
-            }
-        });
-
-    </script>
-
-    <script src="/app/app.js" type="module"></script>
   </body>
 </html>
