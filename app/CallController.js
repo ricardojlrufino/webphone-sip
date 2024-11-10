@@ -7,6 +7,16 @@
 
 import { SimpleUser } from "sip.js/lib/platform/web";
 
+
+export const SessionStatus = {
+    CONNECTING: 'connecting',
+    REGISTRATION_FAILED: 'registrationFailed',
+    REGISTERED: 'registered',
+    UNREGISTERED: 'unregistered',
+    CONNECTED: 'connected',
+    DISCONNECTED: 'disconnected'
+};
+
 export const CallStatus = {
     CALL_OUT: 'call-out',
     CALL_IN: 'call-in',
@@ -64,7 +74,6 @@ class CallController {
 
         try {
             this.#remoteAudio = this.#getRemoteAudioElement();
-
             const options = {
                 media: {
                     constraints: {
@@ -80,7 +89,7 @@ class CallController {
                 },
                 aor: `sip:${this.#accountConfig.username}@${this.#accountConfig.domain}`,
                 userAgentOptions: {
-                    authorizationUsername: this.#accountConfig.user,
+                    authorizationUsername: this.#accountConfig.username,
                     authorizationPassword: this.#accountConfig.password,
                     userAgentString: `WebPhone/${this.#accountConfig.version}`
                 }
@@ -96,11 +105,11 @@ class CallController {
             this.#simpleUser.connect()
                 .then(() => this.#simpleUser.register())
                 .then(() => {
-                    this.#notifyListener('connecting', this.#simpleUser);
+                    this.#notifyListener(SessionStatus.CONNECTING, this.#simpleUser);
                 })
                 .catch(error => {
                     console.error('Failed to connect:', error);
-                    this.#notifyListener('registrationFailed', error);
+                    this.#notifyListener(SessionStatus.REGISTRATION_FAILED, error);
                 });
 
         } catch (error) {
@@ -144,17 +153,17 @@ class CallController {
             },
             onRegistered: () => {
                 localStorage.setItem('sip.registered', 'true');
-                this.#notifyListener('registered', {});
+                this.#notifyListener(SessionStatus.REGISTERED, {});
             },
             onUnregistered: () => {
                 localStorage.setItem('sip.registered', 'false');
-                this.#notifyListener('unregistered', {});
+                this.#notifyListener(SessionStatus.UNREGISTERED, {});
             },
             onServerConnect: () => {
-                this.#notifyListener('connected', {});
+                this.#notifyListener(SessionStatus.CONNECTED, {});
             },
             onServerDisconnect: () => {
-                this.#notifyListener('disconnected', {});
+                this.#notifyListener(SessionStatus.DISCONNECTED, {});
             }
         };
     }
@@ -211,7 +220,7 @@ class CallController {
         try {
             await this.#simpleUser.disconnect();
             this.#simpleUser = null;
-            this.#notifyListener('disconnected');
+            this.#notifyListener(SessionStatus.DISCONNECTED);
         } catch (error) {
             console.error('Error disconnecting:', error);
         }

@@ -1,4 +1,7 @@
 # webphone-sip
+
+![Logo](/docs/logo.svg?raw=true "Logo")
+
 WebRTC SIP based VoIP client software (+chrome extension)
 
 It allows you to make calls using your browser in an extremely productive way.

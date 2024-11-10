@@ -1,36 +1,59 @@
-<form class="box">
-
+<form class="box" autocomplete="off">
     <div class="field">
-        <label class="label" data-localize="username">Username</label>
-        <div class="control has-icons-left ">
-            <input class="input is-small" type="text" name="username" required>
+        <label class="label" for="username" data-localize="username">Username</label>
+        <div class="control has-icons-left">
+            <input class="input is-small" 
+                   type="text" 
+                   id="username"
+                   name="username" 
+                   required
+                   aria-required="true">
             <span class="icon is-small is-left">
-                <i class="fa fa-user"></i>
+                <i class="fa fa-user" aria-hidden="true"></i>
             </span>
         </div>
     </div>
 
     <div class="field">
-        <label class="label" data-localize="password">Password</label>
-        <div class="control has-icons-left ">
-            <input class="input is-small" name="password" type="password">
+        <label class="label" for="password" data-localize="password">Password</label>
+        <div class="control has-icons-left">
+            <input class="input is-small" 
+                   id="password"
+                   name="password" 
+                   type="password"
+                   required
+                   aria-required="true"
+                   autocomplete="new-password">
             <span class="icon is-small is-left">
-                <i class="fa fa-key"></i>
+                <i class="fa fa-key" aria-hidden="true"></i>
             </span>
         </div>
     </div>
 
     <div class="field">
-        <label class="label" data-localize="domain">Domain</label>
+        <label class="label" for="domain" data-localize="domain">Domain</label>
         <div class="control">
-            <input class="input is-small" type="text" name="domain" placeholder="" required>
+            <input class="input is-small" 
+                   type="text" 
+                   id="domain"
+                   name="domain" 
+                   placeholder="sip.example.com"
+                   required
+                   aria-required="true">
         </div>
     </div>
 
     <div class="field">
-        <label class="label" data-localize="proxy">SIP Server</label>
+        <label class="label" for="proxy" data-localize="proxy">SIP Server</label>
         <div class="control">
-            <input class="input is-small" type="text" name="proxy" placeholder="myserver.com:7443" required>
+            <input class="input is-small" 
+                   type="text" 
+                   id="proxy"
+                   name="proxy" 
+                   placeholder="myserver.com:7443"
+                   title="Enter server address with optional port (e.g., myserver.com:7443)"
+                   required
+                   aria-required="true">
         </div>
     </div>
 
@@ -39,23 +62,36 @@
             <button type="submit" class="button is-link" data-localize="save">Save</button>
         </div>
         <div class="control">
-                <button type="button" class="button is-danger btnCancel" data-localize="clean">Clean</button>
-            </div>
+            <button type="button" class="button is-danger btnCancel" data-localize="clean">
+                <span class="icon"><i class="fa fa-trash" aria-hidden="true"></i></span>
+            </button>
+        </div>
+        <div class="control">
+            <button type="button" class="button is-info btnSaveToFile" data-localize="export_to_file">
+                <span class="icon">
+                    <i class="fa fa-download" aria-hidden="true"></i>
+                </span>
+                <span>Export</span>
+            </button>
+        </div>
         <div class="control">
             <div class="file">
                 <label class="file-label">
-                  <input class="file-input" type="file" name="resume">
-                  <span class="file-cta">
-                    <span class="file-icon">
-                      <i class="fa fa-upload"></i>
+                    <input class="file-input" 
+                           type="file" 
+                           name="resume"
+                           accept=".json"
+                           aria-label="Upload configuration file">
+                    <span class="file-cta">
+                        <span class="file-icon">
+                            <i class="fa fa-upload" aria-hidden="true"></i>
+                        </span>
+                        <span class="file-label" data-localize="load_from_file">
+                            Import…
+                        </span>
                     </span>
-                    <span class="file-label"  data-localize="load_from_file">
-                      Choose a file…
-                    </span>
-                  </span>
                 </label>
-              </div>
+            </div>
         </div>
     </div>
-
 </form>

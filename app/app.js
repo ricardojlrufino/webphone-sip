@@ -42,7 +42,7 @@ var AppClass = function () {
                 return false;
             }
 
-            CallController.init(JSON.parse(account), onCallStateChange);
+            CallController.init(JSON.parse(account), notifyCallStateChange);
 
             DialPage.init($("#DialPage"));
 
@@ -62,7 +62,7 @@ var AppClass = function () {
         // Show dial after configuration
         Events.on('config::registered', function () {
             DialPage.init($("#DialPage"));
-            CallController.setListener(onCallStateChange);
+            CallController.setListener(notifyCallStateChange);
 
             $("[data-tab='DialPage']").removeAttr('disabled');
             $("[data-tab='DialPage']").trigger('click');
@@ -146,7 +146,7 @@ var AppClass = function () {
         });
     }
 
-    function onCallStateChange(state, e) {
+    function notifyCallStateChange(state, e) {
         // Broadcast event
         Events.emit('call::state_change', state, e);
     }

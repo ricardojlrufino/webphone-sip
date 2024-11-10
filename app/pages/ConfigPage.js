@@ -7,13 +7,16 @@
 
 import $ from 'jquery';
 import CallController from '../CallController';
+import { SessionStatus } from "../CallController";
 import Events from '../utils/eventEmitter';
+
 
 class ConfigPage {
     #element = null;
     #form = null;
     #fileInput = null;
     #cancelButton = null;
+    #saveToFileButton = null;
 
     constructor() {
         // Não precisamos mais do bind pois usaremos arrow functions
@@ -38,6 +41,7 @@ class ConfigPage {
         this.#form = $('form', this.#element);
         this.#fileInput = $('input[type=file]', this.#element);
         this.#cancelButton = $('.btnCancel', this.#element);
+        this.#saveToFileButton = $('.btnSaveToFile', this.#element);
     }
 
     /**
@@ -48,6 +52,7 @@ class ConfigPage {
         this.#form.on('submit', this.#handleFormSubmit);
         this.#fileInput.on('change', this.#handleFileInput);
         this.#cancelButton.on('click', this.#handleCancel);
+        this.#saveToFileButton.on('click', this.#handleSaveToFile);
     }
 
     /**
@@ -55,13 +60,19 @@ class ConfigPage {
      * @private
      */
     #handleStateChange = (state) => {
-        // Broadcast event
+        // Broadcast event to app.js/main and DialPage
         Events.emit('call::state_change', state);
 
-        if (state === 'registered') {
+        if (state === SessionStatus.REGISTERED) {
             localStorage.setItem('config.registered', 'true');
             Events.emit('config::registered');
         }
+
+        if (state === SessionStatus.UNREGISTERED || state === SessionStatus.DISCONNECTED) {
+            localStorage.setItem('config.registered', 'false');
+            alert(window.$loc.status_registrationFailed);
+        }
+
     }
 
     /**
@@ -154,6 +165,28 @@ class ConfigPage {
             this.#showSuccessMessage('Configuration loaded from file');
         } catch (error) {
             this.#showErrorMessage('Invalid configuration file');
+        }
+    }
+
+    /**
+     * Handle save to file button click
+     * @private
+     */
+    #handleSaveToFile = () => {
+        try {
+            const config = this.#getFormConfig();
+            const blob = new Blob([JSON.stringify(config, null, 2)], { type: 'application/json' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'sip-config.json';
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+            this.#showSuccessMessage('Configuration saved to file successfully');
+        } catch (error) {
+            this.#showErrorMessage('Error saving configuration to file');
         }
     }
 

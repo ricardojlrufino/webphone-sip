@@ -10,8 +10,8 @@
     "password" : "Senha",
     "domain" : "Domínio",
     "proxy" : "Proxy SIP",
-    "load_from_file" : "Arquivo",
-    
+    "load_from_file" : "Importar",
+    "export_to_file" : "Exportar",
     "error_no_account" : "Account not configured !",
 
     "status_ended" : "Finalizada",
