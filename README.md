@@ -16,6 +16,7 @@ It allows you to make calls using your browser in an extremely productive way.
 * ONLY JAVA-SCRIPT (using SIP.js)
 * Chrome Extension for Click-To-CALL
 * Internationalization Support
+* PWA (Progressive Web App)
 
 ### TODO 
 * Call History
@@ -44,11 +45,13 @@ Please send me feedback if you will use. ;)
 * Need Https and WebRTC
 * FreeSwitch
 
-PS: I have not done any testing using asterisk so far
+_PS: I have not done any testing using asterisk so far. If you test me, let me know_
 
 
-## Compile e Testing
+## Compile e Testing 
 
-> npm install
-> npm start
+This project is developed in vanilla javascipt, using Vite as build tool
+
+> npm install  
+> npm start  
 
