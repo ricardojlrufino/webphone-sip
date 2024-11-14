@@ -60,18 +60,19 @@ class ConfigPage {
      * @private
      */
     #handleStateChange = (state) => {
-        // Broadcast event to app.js/main and DialPage
-        Events.emit('call::state_change', state);
-
+       
         if (state === SessionStatus.REGISTERED) {
             localStorage.setItem('config.registered', 'true');
             Events.emit('config::registered');
         }
 
-        if (state === SessionStatus.UNREGISTERED || state === SessionStatus.DISCONNECTED) {
+        if (state === SessionStatus.UNREGISTERED) {
             localStorage.setItem('config.registered', 'false');
             alert(window.$loc.status_registrationFailed);
         }
+
+        // Broadcast event to app.js/main and DialPage
+        Events.emit('call::state_change', state);
 
     }
 
@@ -131,8 +132,15 @@ class ConfigPage {
     #saveAndInitializeConfig = async (config) => {
         try {
             localStorage.setItem('sip.account', JSON.stringify(config));
+
+            const time = CallController.isConnected() ? 5000 : 100;
             CallController.disconnect();
-            CallController.init(config, this.#handleStateChange);
+            // CallController.setListener(null); // avoid trigger events.
+
+            setTimeout(() => {
+                CallController.init(config, this.#handleStateChange);
+            }, time);
+
         } catch (error) {
             throw new Error(`Failed to initialize configuration: ${error.message}`);
         }

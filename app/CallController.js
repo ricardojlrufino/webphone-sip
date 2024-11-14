@@ -102,11 +102,9 @@ class CallController {
             window.addEventListener('unload', this.onUnloadPage);
 
             // Connect and register
+            this.#notifyListener(SessionStatus.CONNECTING);
             this.#simpleUser.connect()
                 .then(() => this.#simpleUser.register())
-                .then(() => {
-                    this.#notifyListener(SessionStatus.CONNECTING, this.#simpleUser);
-                })
                 .catch(error => {
                     console.error('Failed to connect:', error);
                     this.#notifyListener(SessionStatus.REGISTRATION_FAILED, error);
@@ -150,6 +148,11 @@ class CallController {
             },
             onCallHangup: () => {
                 this.#notifyListener(CallStatus.ENDED);
+                setTimeout(() => {
+                    if (this.#simpleUser.isConnected()){
+                        this.#notifyListener(SessionStatus.REGISTERED);
+                    }
+                }, 2000);
             },
             onRegistered: () => {
                 localStorage.setItem('sip.registered', 'true');
@@ -212,6 +215,11 @@ class CallController {
         }
     }
 
+    isConnected() {
+        if (!this.#simpleUser) return false;
+        return this.#simpleUser.isConnected();
+    }
+
     /**
      * Disconnect the phone
      */
@@ -220,7 +228,7 @@ class CallController {
         try {
             await this.#simpleUser.disconnect();
             this.#simpleUser = null;
-            this.#notifyListener(SessionStatus.DISCONNECTED);
+            // this.#notifyListener(SessionStatus.DISCONNECTED);
         } catch (error) {
             console.error('Error disconnecting:', error);
         }
