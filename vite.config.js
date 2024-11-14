@@ -3,6 +3,7 @@ import inject from "@rollup/plugin-inject";
 import { VitePWA } from 'vite-plugin-pwa'
 
 export default defineConfig({
+  base: '/webphone-sip/',
   build: {
     sourcemap: true,
   },

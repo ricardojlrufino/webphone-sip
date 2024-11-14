@@ -26,7 +26,7 @@ var AppClass = function () {
     // Maximum number of event listeners (used to prevent memory leaks and dumb code) 
     this.maxListeners = 20;
 
-    this.version = "0.1.2"; // Please also change in chrome-extension/manifest
+    this.version = "1.2.0"; // Please also change in chrome-extension/manifest
 
     this.init = function () {
 

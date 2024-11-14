@@ -2,16 +2,16 @@
   "name": "WebPhone-SIP",
   "short_name": "WebPhone",
   "description": "A web-based SIP phone client",
-  "start_url": "/",
-  "scope": "/",
+  "start_url": "/webphone-sip/",
+  "scope": "/webphone-sip/",
   "icons": [
     {
-      "src": "/web-app-manifest-192x192.png",
+      "src": "web-app-manifest-192x192.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "/web-app-manifest-512x512.png",
+      "src": "web-app-manifest-512x512.png",
       "sizes": "512x512",
       "type": "image/png"
     }
